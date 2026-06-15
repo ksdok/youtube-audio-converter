@@ -396,16 +396,26 @@ run_interactive_mode() {
     OUTPUT_DIR=$(prompt_user "Output directory" "$OUTPUT_DIR")
     ARCHIVE_FILE=$(prompt_user "Archive file (leave empty to disable)" "$ARCHIVE_FILE")
 
-    # We'll handle confirmation and launch in TICKET-006C
-    echo -e "\n${GREEN}Information collected successfully!${NC}"
+    # --- Confirmation and Launch ---
+    echo -e "\n${BLUE}=== Final Configuration Summary ===${NC}"
+    echo -e "Source: ${INTERACTIVE_SOURCE_FILE:-$(echo "${INTERACTIVE_SOURCES[*]}" | tr '\\n' ' ')}"
+    echo -e "Format: ${YELLOW}$AUDIO_FORMAT${NC}"
+    echo -e "Directory: ${YELLOW}$OUTPUT_DIR${NC}"
+    echo -e "Playlist Mode: ${YELLOW}$PLAYLIST_MODE${NC}"
+    echo -e "Archive File: ${YELLOW}${ARCHIVE_FILE:-None}${NC}"
+    echo -e "${BLUE}=====================================${NC}"
     
-    # For now (TICKET-006B), we stop here or just print what we got
-    echo -e "\n--- Current Configuration ---"
-    echo "Sources: ${#INTERACTIVE_SOURCES[@]} URL(s) or File: ${INTERACTIVE_SOURCE_FILE:-None}"
-    echo "Format: $AUDIO_FORMAT"
-    echo "Directory: $OUTPUT_DIR"
-    echo "Playlist Mode: $PLAYLIST_MODE"
-    echo "Archive: ${ARCHIVE_FILE:-None}"
+    confirm=$(prompt_user "Confirm and start download?" "y")
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "\n${GREEN}Starting conversion...${NC}\n"
+        if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
+            process_file "$INTERACTIVE_SOURCE_FILE"
+        else
+            process_urls "${INTERACTIVE_SOURCES[@]}"
+        fi
+    else
+        echo -e "\n${YELLOW}Operation cancelled by user.${NC}"
+    fi
 }
 
 # Main function
