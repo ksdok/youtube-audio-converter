@@ -398,7 +398,11 @@ run_interactive_mode() {
 
     # --- Confirmation and Launch ---
     echo -e "\n${BLUE}=== Final Configuration Summary ===${NC}"
-    echo -e "Source: ${INTERACTIVE_SOURCE_FILE:-$(echo "${INTERACTIVE_SOURCES[*]}" | tr '\\n' ' ')}"
+    if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
+        echo -e "Source: ${INTERACTIVE_SOURCE_FILE}"
+    else
+        echo -e "Source: ${#INTERACTIVE_SOURCES[@]} URL(s): ${INTERACTIVE_SOURCES[*]}"
+    fi
     echo -e "Format: ${YELLOW}$AUDIO_FORMAT${NC}"
     echo -e "Directory: ${YELLOW}$OUTPUT_DIR${NC}"
     echo -e "Playlist Mode: ${YELLOW}$PLAYLIST_MODE${NC}"
@@ -406,7 +410,7 @@ run_interactive_mode() {
     echo -e "${BLUE}=====================================${NC}"
     
     confirm=$(prompt_user "Confirm and start download?" "y")
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+    if [[ "$confirm" =~ ^[Yy]([Ee][Ss])?$ ]]; then
         echo -e "\n${GREEN}Starting conversion...${NC}\n"
         if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
             process_file "$INTERACTIVE_SOURCE_FILE"
