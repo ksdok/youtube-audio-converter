@@ -1,24 +1,24 @@
 # YouTube Audio Converter
 
-Un script Bash professionnel pour extraire l'audio de vidéos YouTube et les convertir en fichiers audio (MP3 par défaut) avec la meilleure qualité possible.
+A professional Bash script to extract audio from YouTube videos and convert them into audio files (MP3 by default) with the best possible quality.
 
-## 🚀 Fonctionnalités
+## 🚀 Features
 
-- **Multi-source** : Conversion d'une seule URL, de plusieurs URLs ou d'un fichier texte.
-- **Mode Playlist** : Support complet des playlists YouTube et YouTube Music (`--playlist`).
-- **Anti-Doublons** : Système d'archivage pour éviter de retélécharger des vidéos déjà traitées (`--archive`).
-- **Qualité Maximale** : Extraction automatique de la meilleure qualité audio disponible (qualité 0).
-- **Flexibilité** : Dossier de sortie et format audio configurables.
-- **Robuste** : Vérification automatique des dépendances (`yt-dlp`, `ffmpeg`) et gestion des erreurs.
+- **Multi-source** : Convert a single URL, multiple URLs, or a text file.
+- **Playlist Mode** : Full support for YouTube and YouTube Music playlists (`--playlist`).
+- **Anti-Duplicate** : Archiving system to avoid re-downloading already processed videos (`--archive`).
+- **Maximum Quality** : Automatic extraction of the best available audio quality (quality 0).
+- **Flexibility** : Configurable output directory and audio format.
+- **Robust** : Automatic dependency check (`yt-dlp`, `ffmpeg`) and error handling.
 
-## 🛠️ Prérequis
+## 🛠️ Prerequisites
 
-Le script nécessite les outils suivants :
+The script requires the following tools:
 
-1. **yt-dlp** (fortement recommandé) ou **youtube-dl**.
-2. **ffmpeg** (indispensable pour la conversion audio).
+1. **yt-dlp** (strongly recommended) or **youtube-dl**.
+2. **ffmpeg** (essential for audio conversion).
 
-### Installation rapide
+### Quick Installation
 
 #### macOS (via Homebrew)
 ```bash
@@ -40,86 +40,86 @@ sudo dnf install yt-dlp ffmpeg
 pip install yt-dlp
 ```
 
-> **Note** : `ffmpeg` doit être installé comme binaire système. Le paquet Python `ffmpeg-python` ne suffit pas.
+> **Note**: `ffmpeg` must be installed as a system binary. The Python package `ffmpeg-python` is not sufficient.
 
-## 📖 Utilisation
+## 📖 Usage
 
-### 1. Téléchargement simple (vidéos uniques)
-Pour une ou plusieurs vidéos :
+### 1. Simple Download (single videos)
+For one or more videos:
 ```bash
 ./youtube_to_mp3.sh "https://www.youtube.com/watch?v=ID1" "https://www.youtube.com/watch?v=ID2"
 ```
 
-### 2. Utilisation d'un fichier d'URLs
-Créez un fichier `urls.txt` avec une URL par ligne, puis :
+### 2. Using a URL File
+Create a `urls.txt` file with one URL per line, then:
 ```bash
 ./youtube_to_mp3.sh urls.txt
 ```
 
-### 3. Téléchargement d'une Playlist complète
-Par défaut, le script ne télécharge que la première vidéo d'une playlist pour éviter les téléchargements massifs accidentels. Utilisez l'option `--playlist` pour traiter toute la liste :
+### 3. Downloading a Full Playlist
+By default, the script only downloads the first video of a playlist to avoid accidental mass downloads. Use the `--playlist` option to process the entire list:
 ```bash
-./youtube_to_mp3.sh --playlist "https://www.youtube.com/playlist?list=ID_PLAYLIST"
+./youtube_to_mp3.sh --playlist "https://www.youtube.com/playlist?list=PLAYLIST_ID"
 ```
 
-### 4. Éviter les doublons avec une archive
-Pour ne pas retélécharger des vidéos déjà convertiées lors de sessions précédentes :
+### 4. Avoiding Duplicates with an Archive
+To avoid re-downloading videos already converted in previous sessions:
 ```bash
 ./youtube_to_mp3.sh --archive archive.txt urls.txt
 ```
-*Le script créera `archive.txt` et y enregistrera l'ID de chaque vidéo traitée.*
+*The script will create `archive.txt` and record the ID of each processed video.*
 
-### 5. Personnalisation du dossier et du format
+### 5. Customizing Folder and Format
 ```bash
-# Sortie dans un dossier spécifique et format WAV
-./youtube_to_mp3.sh -o "./ma_musique" -f wav "https://www.youtube.com/watch?v=ID"
+# Output to a specific folder and WAV format
+./youtube_to_mp3.sh -o "./my_music" -f wav "https://www.youtube.com/watch?v=ID"
 ```
 
-## ⚙️ Options CLI
+## ⚙️ CLI Options
 
-| Option | Description | Valeur par défaut |
+| Option | Description | Default Value |
 | :--- | :--- | :--- |
-| `-h, --help` | Affiche l'aide | - |
-| `-o, --output` | Dossier de sortie des fichiers audio | `./mp3` |
-| `-f, --format` | Format audio (`mp3`, `m4a`, `wav`, etc.) | `mp3` |
-| `--playlist` | Autorise le téléchargement complet d'une playlist | Désactivé |
-| `--archive FILE` | Fichier pour suivre les vidéos déjà téléchargées | Aucun |
+| `-h, --help` | Displays help | - |
+| `-o, --output` | Output directory for audio files | `./mp3` |
+| `-f, --format` | Audio format (`mp3`, `m4a`, `wav`, etc.) | `mp3` |
+| `--playlist` | Allows full download of a playlist | Disabled |
+| `--archive FILE` | File to track already downloaded videos | None |
 
-## 📄 Format du fichier d'URLs
+## 📄 URL File Format
 
-Le script accepte des fichiers texte simples. Les lignes vides et les commentaires commençant par `#` sont ignorés.
+The script accepts simple text files. Empty lines and comments starting with `#` are ignored.
 
 ```text
-# Mes classiques
+# My classics
 https://www.youtube.com/watch?v=abc12345
 https://www.youtube.com/watch?v=def67890
 
-# À traiter plus tard
+# To process later
 # https://www.youtube.com/watch?v=ghi11122
 ```
 
-## 📦 Sortie et Nommage
+## 📦 Output and Naming
 
-Les fichiers sont enregistrés sous la forme : `Titre de la Vidéo [ID_YouTube].mp3`.
-L'inclusion de l'ID permet d'éviter d'écraser des fichiers ayant le même titre.
+Files are saved as: `Video Title [YouTube_ID].mp3`.
+Including the ID prevents overwriting files with the same title.
 
-## ⚠️ Remarques et Dépannage
+## ⚠️ Remarks and Troubleshooting
 
-### Problèmes de permissions
-Si le script refuse de se lancer, rendez-le exécutable :
+### Permission Issues
+If the script refuses to run, make it executable:
 ```bash
 chmod +x youtube_to_mp3.sh
 ```
 
-### Erreurs de téléchargement
-- **URL invalide** : Vérifiez que l'URL est bien une adresse YouTube valide.
-- **Contenu restreint** : Certaines vidéos (âge, région) peuvent bloquer le téléchargement.
-- **Mise à jour de yt-dlp** : YouTube change fréquemment ses algorithmes. Si le téléchargement échoue, mettez à jour `yt-dlp` :
-  - `pip install -U yt-dlp` ou `brew upgrade yt-dlp`.
+### Download Errors
+- **Invalid URL**: Ensure the URL is a valid YouTube address.
+- **Restricted Content**: Some videos (age or region restricted) may block the download.
+- **Updating yt-dlp**: YouTube frequently changes its algorithms. If the download fails, update `yt-dlp`:
+  - `pip install -U yt-dlp` or `brew upgrade yt-dlp`.
 
-### Droits d'auteur
-L'utilisation de ce script doit se faire dans le respect des conditions d'utilisation de YouTube et des droits de propriété intellectuelle.
+### Copyright
+The use of this script must comply with YouTube's Terms of Service and intellectual property rights.
 
-## ⚖️ Licence
+## ⚖️ License
 
-Ce projet est distribué sous licence **MIT**. Voir le fichier `LICENSE` pour plus de détails.
+This project is distributed under the **MIT License**. See the `LICENSE` file for more details.
