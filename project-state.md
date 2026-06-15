@@ -15,13 +15,12 @@ Fonctionnalités déjà disponibles :
 - Vérification des dépendances `yt-dlp`/`youtube-dl` et `ffmpeg`.
 - Résumé des succès/échecs.
 - Exclusion Git des fichiers audio générés via `.gitignore`.
+- Support des playlists YouTube (`--playlist`).
+- Archive anti-doublons (`--archive`).
 
 Limitations connues :
 
-- Les playlists YouTube sont explicitement refusées.
-- Le README principal n'est pas nommé `README.md`.
 - Pas de mode interactif.
-- Pas de système anti-doublons persistant.
 - Pas de logs détaillés.
 - Pas d'installation globale du script.
 - Pas de tests automatisés.
@@ -36,7 +35,11 @@ Limitations connues :
 
 ## Backlog
 
-### TICKET-001 — Renommer la documentation principale en README.md
+### TICKET-001 — ✅ Renommer la documentation principale en README.md
+
+Complexité : XS | **TERMINÉ (commit 1003a41)**
+
+Renommage effectué : `README_YOUTUBE_MP3.md` → `README.md`.
 
 Complexité : XS
 
@@ -51,7 +54,11 @@ Critères d'acceptation :
 
 ---
 
-### TICKET-002 — Ajouter le support explicite des playlists YouTube
+### TICKET-002 — ✅ Ajouter le support explicite des playlists YouTube
+
+Complexité initiale : L | **TERMINÉ (commit 86fb7cb)**
+
+Support complet implémenté via `--playlist`.
 
 Complexité initiale : L
 
@@ -60,7 +67,11 @@ Permettre au script de télécharger l'audio d'une playlist YouTube complète, s
 
 Découpage recommandé :
 
-#### TICKET-002A — Détecter les URLs de playlists
+#### TICKET-002A — ✅ Détecter les URLs de playlists
+
+Complexité : S | **TERMINÉ (commit 1003a41)**
+
+Modification de `is_valid_url()` pour accepter les URLs playlist.
 
 Complexité : S
 
@@ -73,7 +84,11 @@ Critères d'acceptation :
 - `https://music.youtube.com/playlist?list=...` est reconnue comme URL supportée.
 - Les URLs non YouTube restent refusées.
 
-#### TICKET-002B — Ajouter une option `--playlist`
+#### TICKET-002B — ✅ Ajouter une option `--playlist`
+
+Complexité : M | **TERMINÉ (commit 86fb7cb)**
+
+Option `--playlist` fonctionnelle avec `--yes-playlist`/`--no-playlist`.
 
 Complexité : M
 
@@ -86,7 +101,11 @@ Critères d'acceptation :
 - `./youtube_to_mp3.sh "URL_VIDEO_AVEC_LIST"` ne télécharge qu'une seule vidéo.
 - L'aide `--help` documente l'option.
 
-#### TICKET-002C — Adapter le nommage des fichiers pour les playlists
+#### TICKET-002C — ⏸️ Adapter le nommage des fichiers pour les playlists
+
+Complexité : S | **PLANIFIÉ**
+
+À implémenter plus tard pour prefixer les fichiers playlist avec leur index.
 
 Complexité : S
 
@@ -100,7 +119,11 @@ Critères d'acceptation :
 
 ---
 
-### TICKET-003 — Ajouter une archive anti-doublons
+### TICKET-003 — ✅ Ajouter une archive anti-doublons
+
+Complexité : M | **TERMINÉ (commit 86fb7cb)**
+
+Option `--archive FILE` fonctionnelle avec `--download-archive`.
 
 Complexité : M
 
@@ -245,7 +268,11 @@ Critères d'acceptation :
 
 ---
 
-### TICKET-009 — Ajouter une licence open source
+### TICKET-009 — ✅ Ajouter une licence open source
+
+Complexité : XS | **TERMINÉ (commit 1003a41)**
+
+Fichier `LICENSE` (MIT) créé.
 
 Complexité : XS
 
