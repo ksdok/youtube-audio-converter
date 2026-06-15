@@ -22,12 +22,14 @@ show_help() {
     echo "  -o, --output   Output directory (default: ./mp3)"
     echo "  -f, --format   Output audio format (default: mp3)"
     echo "  --playlist     Process YouTube playlists (default: process single video only)"
+    echo "  --archive FILE Use yt-dlp download archive to avoid duplicates"
     echo ""
     echo "Examples:"
     echo "  $0 https://www.youtube.com/watch?v=example1 https://www.youtube.com/watch?v=example2"
     echo "  $0 urls.txt"
     echo "  $0 -o /path/to/directory urls.txt"
     echo "  $0 --playlist https://www.youtube.com/playlist?list=..."
+    echo "  $0 --archive downloaded.txt urls.txt"
 }
 
 is_valid_url() {
@@ -50,6 +52,7 @@ is_valid_url() {
 OUTPUT_DIR="./mp3"
 AUDIO_FORMAT="mp3"
 PLAYLIST_MODE=false
+ARCHIVE_FILE=""
 
 # Argument processing
 while [[ $# -gt 0 ]]; do
@@ -77,6 +80,14 @@ while [[ $# -gt 0 ]]; do
         --playlist)
             PLAYLIST_MODE=true
             shift
+            ;;
+        --archive)
+            if [ $# -lt 2 ]; then
+                echo -e "${RED}Error: option $1 requires a file path.${NC}" >&2
+                exit 1
+            fi
+            ARCHIVE_FILE="$2"
+            shift 2
             ;;
         --)
             shift
@@ -157,20 +168,20 @@ process_url() {
     
     printf '%bTitle:%b %s\n' "$BLUE" "$NC" "$title"
     
-    # Download and convert with best quality
-    # Template allows yt-dlp to sanitize title and add video ID to avoid collisions
+    # Build yt-dlp arguments
     local playlist_flag="--no-playlist"
     if [ "$PLAYLIST_MODE" = true ]; then
         playlist_flag="--yes-playlist"
     fi
     
-    if $YOUTUBE_DL \
-        $playlist_flag \
-        --extract-audio \
-        --audio-format "$AUDIO_FORMAT" \
-        --audio-quality 0 \
-        --output "$OUTPUT_DIR/%(title).100s [%(id)s].%(ext)s" \
-        -- "$url"; then
+    local yt_args=("$playlist_flag" "--extract-audio" "--audio-format" "$AUDIO_FORMAT" "--audio-quality" "0" "--output" "$OUTPUT_DIR/%(title).100s [%(id)s].%(ext)s" "--" "$url")
+    
+    # Add archive flag if provided
+    if [ -n "$ARCHIVE_FILE" ]; then
+        yt_args=("--download-archive" "$ARCHIVE_FILE" "${yt_args[@]}")
+    fi
+    
+    if $YOUTUBE_DL "${yt_args[@]}"; then
         echo -e "${GREEN}✓ Conversion completed to format $AUDIO_FORMAT${NC}"
     else
         echo -e "${RED}✗ Conversion failed for: $url${NC}" >&2
