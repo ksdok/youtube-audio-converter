@@ -2,30 +2,30 @@
 
 set -euo pipefail
 
-# Script pour extraire le son de vidéos YouTube et les convertir en fichiers audio
+# Script to extract audio from YouTube videos and convert them to audio files
 # Usage: ./youtube_to_mp3.sh urls.txt
 #        ./youtube_to_mp3.sh url1 url2 url3...
 
-# Couleurs pour l'affichage
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Fonction pour afficher l'aide
+# Function to display help
 show_help() {
     echo "Usage: $0 [OPTIONS] [URLS...|FILE]"
     echo ""
     echo "Options:"
-    echo "  -h, --help     Affiche cette aide"
-    echo "  -o, --output   Dossier de sortie (par défaut: ./mp3)"
-    echo "  -f, --format   Format audio de sortie (par défaut: mp3)"
+    echo "  -h, --help     Display this help"
+    echo "  -o, --output   Output directory (default: ./mp3)"
+    echo "  -f, --format   Output audio format (default: mp3)"
     echo ""
-    echo "Exemples:"
+    echo "Examples:"
     echo "  $0 https://www.youtube.com/watch?v=example1 https://www.youtube.com/watch?v=example2"
     echo "  $0 urls.txt"
-    echo "  $0 -o /chemin/vers/dossier urls.txt"
+    echo "  $0 -o /path/to/directory urls.txt"
 }
 
 is_valid_url() {
@@ -44,11 +44,11 @@ is_valid_url() {
     esac
 }
 
-# Valeurs par défaut
+# Default values
 OUTPUT_DIR="./mp3"
 AUDIO_FORMAT="mp3"
 
-# Traitement des arguments
+# Argument processing
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
@@ -57,7 +57,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -o|--output)
             if [ $# -lt 2 ]; then
-                echo -e "${RED}Erreur: l'option $1 nécessite un dossier de sortie.${NC}" >&2
+                echo -e "${RED}Error: option $1 requires an output directory.${NC}" >&2
                 exit 1
             fi
             OUTPUT_DIR="$2"
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f|--format)
             if [ $# -lt 2 ]; then
-                echo -e "${RED}Erreur: l'option $1 nécessite un format audio.${NC}" >&2
+                echo -e "${RED}Error: option $1 requires an audio format.${NC}" >&2
                 exit 1
             fi
             AUDIO_FORMAT="$2"
@@ -76,7 +76,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         -*)
-            echo -e "${RED}Option inconnue: $1${NC}" >&2
+            echo -e "${RED}Unknown option: $1${NC}" >&2
             show_help
             exit 1
             ;;
@@ -86,61 +86,61 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Vérification des dépendances
+# Dependency check
 check_dependencies() {
-    echo -e "${BLUE}Vérification des dépendances...${NC}"
+    echo -e "${BLUE}Checking dependencies...${NC}"
     
     if ! command -v youtube-dl &> /dev/null && ! command -v yt-dlp &> /dev/null; then
-        echo -e "${RED}Erreur: Ni youtube-dl ni yt-dlp n'est installé.${NC}" >&2
-        echo "Installation de yt-dlp recommandée:"
+        echo -e "${RED}Error: Neither youtube-dl nor yt-dlp is installed.${NC}" >&2
+        echo "yt-dlp installation recommended:"
         echo "  macOS: brew install yt-dlp"
         echo "  Ubuntu/Debian: sudo apt install yt-dlp"
         echo "  Fedora: sudo dnf install yt-dlp"
-        echo "  Ou via pip: pip install yt-dlp"
+        echo "  Or via pip: pip install yt-dlp"
         exit 1
     fi
     
     if ! command -v ffmpeg &> /dev/null; then
-        echo -e "${RED}Erreur: ffmpeg n'est pas installé.${NC}" >&2
-        echo "Installation requise:"
+        echo -e "${RED}Error: ffmpeg is not installed.${NC}" >&2
+        echo "Required installation:"
         echo "  macOS: brew install ffmpeg"
         echo "  Ubuntu/Debian: sudo apt install ffmpeg"
         echo "  Fedora: sudo dnf install ffmpeg"
         exit 1
     fi
     
-    # Utiliser yt-dlp s'il est disponible, sinon youtube-dl
+    # Use yt-dlp if available, otherwise youtube-dl
     if command -v yt-dlp &> /dev/null; then
         YOUTUBE_DL="yt-dlp"
     else
         YOUTUBE_DL="youtube-dl"
     fi
     
-    echo -e "${GREEN}Dépendances vérifiées avec succès.${NC}"
-    echo -e "${BLUE}Utilisation de: $YOUTUBE_DL${NC}"
+    echo -e "${GREEN}Dependencies verified successfully.${NC}"
+    echo -e "${BLUE}Using: $YOUTUBE_DL${NC}"
 }
 
-# Création du dossier de sortie
+# Create output directory
 create_output_dir() {
     if [ ! -d "$OUTPUT_DIR" ]; then
-        echo -e "${BLUE}Création du dossier de sortie: $OUTPUT_DIR${NC}"
+        echo -e "${BLUE}Creating output directory: $OUTPUT_DIR${NC}"
         mkdir -p -- "$OUTPUT_DIR"
     fi
 }
 
-# Extraction et conversion pour une URL
+# Process single URL
 process_url() {
     local url="$1"
     local index="$2"
     
-    printf '%bTraitement de la vidéo %s:%b %s\n' "$YELLOW" "$index" "$NC" "$url"
+    printf '%bProcessing video %s:%b %s\n' "$YELLOW" "$index" "$NC" "$url"
 
     if ! is_valid_url "$url"; then
-        printf '%bURL YouTube invalide ou non supportée:%b %s\n' "$RED" "$NC" "$url" >&2
+        printf '%bInvalid or unsupported YouTube URL:%b %s\n' "$RED" "$NC" "$url" >&2
         return 1
     fi
     
-    # Extraction du titre de la vidéo
+    # Extract video title
     local title
     title=$($YOUTUBE_DL --no-playlist --get-title -- "$url" 2>/dev/null | head -n 1) || title=""
     
@@ -148,10 +148,10 @@ process_url() {
         title="video_$index"
     fi
     
-    printf '%bTitre:%b %s\n' "$BLUE" "$NC" "$title"
+    printf '%bTitle:%b %s\n' "$BLUE" "$NC" "$title"
     
-    # Téléchargement et conversion avec la meilleure qualité.
-    # Le template laisse yt-dlp assainir le titre et ajoute l'id vidéo pour éviter les collisions.
+    # Download and convert with best quality
+    # Template allows yt-dlp to sanitize title and add video ID to avoid collisions
     if $YOUTUBE_DL \
         --no-playlist \
         --extract-audio \
@@ -159,27 +159,27 @@ process_url() {
         --audio-quality 0 \
         --output "$OUTPUT_DIR/%(title).100s [%(id)s].%(ext)s" \
         -- "$url"; then
-        echo -e "${GREEN}✓ Conversion terminée au format $AUDIO_FORMAT${NC}"
+        echo -e "${GREEN}✓ Conversion completed to format $AUDIO_FORMAT${NC}"
     else
-        echo -e "${RED}✗ Échec de la conversion pour: $url${NC}" >&2
+        echo -e "${RED}✗ Conversion failed for: $url${NC}" >&2
         return 1
     fi
 }
 
-# Traitement des URLs à partir d'un fichier
+# Process URLs from file
 process_file() {
     local file="$1"
     
     if [ ! -f "$file" ]; then
-        echo -e "${RED}Erreur: Le fichier $file n'existe pas.${NC}" >&2
+        echo -e "${RED}Error: File $file does not exist.${NC}" >&2
         exit 1
     fi
     
-    echo -e "${BLUE}Lecture des URLs depuis: $file${NC}"
+    echo -e "${BLUE}Reading URLs from: $file${NC}"
     
     local urls=()
     while IFS= read -r line || [ -n "$line" ]; do
-        # Ignorer les lignes vides et les commentaires
+        # Skip empty lines and comments
         if [[ "$line" =~ ^[[:space:]]*$ || "$line" =~ ^[[:space:]]*# ]]; then
             continue
         else
@@ -188,24 +188,24 @@ process_file() {
     done < "$file"
     
     if [ "${#urls[@]}" -eq 0 ]; then
-        echo -e "${RED}Aucune URL à traiter.${NC}" >&2
+        echo -e "${RED}No URLs to process.${NC}" >&2
         exit 1
     fi
     
     process_urls "${urls[@]}"
 }
 
-# Traitement des URLs
+# Process URLs
 process_urls() {
     local urls=("$@")
     local total=${#urls[@]}
     
     if [ "$total" -eq 0 ]; then
-        echo -e "${RED}Aucune URL à traiter.${NC}" >&2
+        echo -e "${RED}No URLs to process.${NC}" >&2
         exit 1
     fi
     
-    echo -e "${BLUE}Traitement de $total vidéo(s)...${NC}"
+    echo -e "${BLUE}Processing $total video(s)...${NC}"
     
     local success_count=0
     local fail_count=0
@@ -220,54 +220,54 @@ process_urls() {
             ((fail_count+=1))
         fi
         
-        echo ""  # Ligne vide pour séparer les traitements
+        echo ""  # Blank line to separate processing
     done
     
-    # Résumé
-    echo -e "${BLUE}=== Résumé ===${NC}"
-    echo -e "${GREEN}Succès: $success_count${NC}"
-    echo -e "${RED}Échecs: $fail_count${NC}"
+    # Summary
+    echo -e "${BLUE}=== Summary ===${NC}"
+    echo -e "${GREEN}Success: $success_count${NC}"
+    echo -e "${RED}Failures: $fail_count${NC}"
     echo -e "${BLUE}Total: $total${NC}"
     
     if [ "$fail_count" -eq 0 ]; then
-        echo -e "${GREEN}Toutes les conversions ont réussi !${NC}"
-        echo -e "${BLUE}Fichiers audio disponibles dans: $OUTPUT_DIR${NC}"
+        echo -e "${GREEN}All conversions succeeded!${NC}"
+        echo -e "${BLUE}Audio files available in: $OUTPUT_DIR${NC}"
     else
-        echo -e "${YELLOW}Certaines conversions ont échoué. Vérifiez les messages d'erreur ci-dessus.${NC}"
+        echo -e "${YELLOW}Some conversions failed. Check the error messages above.${NC}"
         return 1
     fi
 }
 
-# Fonction principale
+# Main function
 main() {
-    # Affichage de l'en-tête
+    # Display header
     echo -e "${BLUE}========================================${NC}"
     echo -e "${BLUE}  YouTube Audio Converter${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
     
-    # Traitement des arguments
+    # Argument processing
     if [ $# -eq 0 ]; then
-        echo -e "${RED}Erreur: Aucune URL ou fichier fourni.${NC}" >&2
+        echo -e "${RED}Error: No URL or file provided.${NC}" >&2
         show_help
         exit 1
     fi
 
-    # Vérification des dépendances après validation minimale des arguments,
-    # afin de retourner les erreurs CLI les plus utiles en premier.
+    # Check dependencies after minimal argument validation
+    # to return most useful CLI errors first
     check_dependencies
     
-    # Création du dossier de sortie
+    # Create output directory
     create_output_dir
     
     if [ $# -eq 1 ] && [ -f "$1" ]; then
-        # Si un seul argument et que c'est un fichier, on le traite comme un fichier d'URLs
+        # If single argument and it's a file, treat as URL file
         process_file "$1"
     else
-        # Sinon, on traite tous les arguments comme des URLs
+        # Otherwise, treat all arguments as URLs
         process_urls "$@"
     fi
 }
 
-# Exécution du script
+# Execute
 main "$@"
