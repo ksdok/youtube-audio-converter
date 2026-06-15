@@ -21,11 +21,13 @@ show_help() {
     echo "  -h, --help     Display this help"
     echo "  -o, --output   Output directory (default: ./mp3)"
     echo "  -f, --format   Output audio format (default: mp3)"
+    echo "  --playlist     Process YouTube playlists (default: process single video only)"
     echo ""
     echo "Examples:"
     echo "  $0 https://www.youtube.com/watch?v=example1 https://www.youtube.com/watch?v=example2"
     echo "  $0 urls.txt"
     echo "  $0 -o /path/to/directory urls.txt"
+    echo "  $0 --playlist https://www.youtube.com/playlist?list=..."
 }
 
 is_valid_url() {
@@ -47,6 +49,7 @@ is_valid_url() {
 # Default values
 OUTPUT_DIR="./mp3"
 AUDIO_FORMAT="mp3"
+PLAYLIST_MODE=false
 
 # Argument processing
 while [[ $# -gt 0 ]]; do
@@ -70,6 +73,10 @@ while [[ $# -gt 0 ]]; do
             fi
             AUDIO_FORMAT="$2"
             shift 2
+            ;;
+        --playlist)
+            PLAYLIST_MODE=true
+            shift
             ;;
         --)
             shift
@@ -152,8 +159,13 @@ process_url() {
     
     # Download and convert with best quality
     # Template allows yt-dlp to sanitize title and add video ID to avoid collisions
+    local playlist_flag="--no-playlist"
+    if [ "$PLAYLIST_MODE" = true ]; then
+        playlist_flag="--yes-playlist"
+    fi
+    
     if $YOUTUBE_DL \
-        --no-playlist \
+        $playlist_flag \
         --extract-audio \
         --audio-format "$AUDIO_FORMAT" \
         --audio-quality 0 \
