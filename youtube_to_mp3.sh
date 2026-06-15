@@ -287,7 +287,7 @@ run_interactive_mode() {
         fi
         
         read -r response
-        echo "${response:-$default}"
+        printf '%s\n' "${response:-$default}"
     }
 
     # --- Source Collection ---
@@ -299,7 +299,7 @@ run_interactive_mode() {
         echo "3) URL file"
         echo "q) Quit"
         
-        read -p "Choice [1-3/q]: " source_choice
+        read -r -p "Choice [1-3/q]: " source_choice
         
         case "$source_choice" in
             1)
@@ -322,7 +322,7 @@ run_interactive_mode() {
                 echo "Enter URLs (one per line). Press Enter on an empty line to finish."
                 INTERACTIVE_SOURCES=()
                 while true; do
-                    read -p "URL: " url
+                    read -r -p "URL: " url
                     [ -z "$url" ] && break
                     if is_valid_url "$url"; then
                         INTERACTIVE_SOURCES+=("$url")
@@ -367,8 +367,8 @@ run_interactive_mode() {
     # Check if any source is a playlist
     local has_playlist=false
     if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
-        # Simple grep to see if file contains playlist URLs
-        if grep -q "playlist" "$INTERACTIVE_SOURCE_FILE"; then
+        # Simple grep to see if file contains playlist URLs, ignoring comments
+        if grep -v '^[[:space:]]*#' "$INTERACTIVE_SOURCE_FILE" | grep -q "playlist"; then
             has_playlist=true
         fi
     else
