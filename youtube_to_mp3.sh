@@ -33,7 +33,7 @@ is_valid_url() {
 
     case "$url" in
         *://www.youtube.com/playlist*|*://youtube.com/playlist*|*://music.youtube.com/playlist*)
-            return 1
+            return 0
             ;;
         http://www.youtube.com/watch\?*|https://www.youtube.com/watch\?*|http://youtube.com/watch\?*|https://youtube.com/watch\?*|http://music.youtube.com/watch\?*|https://music.youtube.com/watch\?*|http://youtu.be/*|https://youtu.be/*|http://www.youtube.com/shorts/*|https://www.youtube.com/shorts/*|http://youtube.com/shorts/*|https://youtube.com/shorts/*|http://www.youtube.com/live/*|https://www.youtube.com/live/*|http://youtube.com/live/*|https://youtube.com/live/*)
             return 0
