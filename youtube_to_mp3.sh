@@ -273,8 +273,139 @@ run_interactive_mode() {
     trap 'echo -e "\n${YELLOW}Operation interrupted by user.${NC}"; exit 130' SIGINT
     
     echo -e "${BLUE}Starting interactive assistant...${NC}"
-    # Implementation will be in TICKET-006B
-    echo -e "${YELLOW}Interactive mode is currently a skeleton.${NC}"
+    
+    # --- Utility function for prompts ---
+    prompt_user() {
+        local question="$1"
+        local default="$2"
+        local response
+        
+        if [ -n "$default" ]; then
+            printf '%b%s [%s]:%b ' "$BLUE" "$question" "$default" "$NC"
+        else
+            printf '%b%s:%b ' "$BLUE" "$question" "$NC"
+        fi
+        
+        read -r response
+        echo "${response:-$default}"
+    }
+
+    # --- Source Collection ---
+    echo -e "${YELLOW}Step 1: Source selection${NC}"
+    while true; do
+        echo "Choose source type:"
+        echo "1) Single URL"
+        echo "2) Multiple URLs (enter one per line, empty line to finish)"
+        echo "3) URL file"
+        echo "q) Quit"
+        
+        read -p "Choice [1-3/q]: " source_choice
+        
+        case "$source_choice" in
+            1)
+                while true; do
+                    url=$(prompt_user "Enter YouTube URL" "")
+                    if [ -z "$url" ]; then
+                        echo -e "${RED}URL cannot be empty.${NC}"
+                        continue
+                    fi
+                    if is_valid_url "$url"; then
+                        INTERACTIVE_SOURCES=("$url")
+                        break
+                    else
+                        echo -e "${RED}Invalid YouTube URL. Please try again.${NC}"
+                    fi
+                done
+                break
+                ;;
+            2)
+                echo "Enter URLs (one per line). Press Enter on an empty line to finish."
+                INTERACTIVE_SOURCES=()
+                while true; do
+                    read -p "URL: " url
+                    [ -z "$url" ] && break
+                    if is_valid_url "$url"; then
+                        INTERACTIVE_SOURCES+=("$url")
+                    else
+                        echo -e "${RED}Invalid URL skipped.${NC}"
+                    fi
+                done
+                if [ "${#INTERACTIVE_SOURCES[@]}" -eq 0 ]; then
+                    echo -e "${RED}No valid URLs entered.${NC}"
+                    continue
+                fi
+                break
+                ;;
+            3)
+                while true; do
+                    file_path=$(prompt_user "Enter path to URL file" "")
+                    if [ -z "$file_path" ]; then
+                        echo -e "${RED}File path cannot be empty.${NC}"
+                        continue
+                    fi
+                    if [ -f "$file_path" ]; then
+                        INTERACTIVE_SOURCE_FILE="$file_path"
+                        INTERACTIVE_SOURCES=()
+                        break
+                    else
+                        echo -e "${RED}File not found: $file_path${NC}"
+                    fi
+                done
+                break
+                ;;
+            q)
+                echo -e "${YELLOW}Exiting assistant.${NC}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}Invalid choice.${NC}"
+                ;;
+        esac
+    done
+
+    # --- Playlist Logic ---
+    # Check if any source is a playlist
+    local has_playlist=false
+    if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
+        # Simple grep to see if file contains playlist URLs
+        if grep -q "playlist" "$INTERACTIVE_SOURCE_FILE"; then
+            has_playlist=true
+        fi
+    else
+        for url in "${INTERACTIVE_SOURCES[@]}"; do
+            if [[ "$url" == *playlist* ]]; then
+                has_playlist=true
+                break
+            fi
+        done
+    fi
+
+    if [ "$has_playlist" = true ]; then
+        echo -e "${YELLOW}Playlist detected!${NC}"
+        playlist_choice=$(prompt_user "Download entire playlist? (y/n)" "y")
+        if [[ "$playlist_choice" =~ ^[Yy]$ ]]; then
+            PLAYLIST_MODE=true
+        else
+            PLAYLIST_MODE=false
+        fi
+    fi
+
+    # --- Configuration ---
+    echo -e "\n${YELLOW}Step 2: Configuration${NC}"
+    AUDIO_FORMAT=$(prompt_user "Output audio format" "$AUDIO_FORMAT")
+    OUTPUT_DIR=$(prompt_user "Output directory" "$OUTPUT_DIR")
+    ARCHIVE_FILE=$(prompt_user "Archive file (leave empty to disable)" "$ARCHIVE_FILE")
+
+    # We'll handle confirmation and launch in TICKET-006C
+    echo -e "\n${GREEN}Information collected successfully!${NC}"
+    
+    # For now (TICKET-006B), we stop here or just print what we got
+    echo -e "\n--- Current Configuration ---"
+    echo "Sources: ${#INTERACTIVE_SOURCES[@]} URL(s) or File: ${INTERACTIVE_SOURCE_FILE:-None}"
+    echo "Format: $AUDIO_FORMAT"
+    echo "Directory: $OUTPUT_DIR"
+    echo "Playlist Mode: $PLAYLIST_MODE"
+    echo "Archive: ${ARCHIVE_FILE:-None}"
 }
 
 # Main function
