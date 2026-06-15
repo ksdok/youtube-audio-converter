@@ -1,0 +1,16 @@
+# Fichiers audio générés
+mp3/
+*.mp3
+*.m4a
+*.wav
+*.flac
+*.opus
+*.aac
+
+# Fichiers temporaires d'éditeurs
+.*.swp
+*.swp
+*~
+
+# Fichiers système macOS
+.DS_Store
