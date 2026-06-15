@@ -23,6 +23,7 @@ show_help() {
     echo "  -f, --format   Output audio format (default: mp3)"
     echo "  --playlist     Process YouTube playlists (default: process single video only)"
     echo "  --archive FILE Use yt-dlp download archive to avoid duplicates"
+    echo "  -i, --interactive Start the interactive assistant"
     echo ""
     echo "Examples:"
     echo "  $0 https://www.youtube.com/watch?v=example1 https://www.youtube.com/watch?v=example2"
@@ -53,6 +54,7 @@ OUTPUT_DIR="./mp3"
 AUDIO_FORMAT="mp3"
 PLAYLIST_MODE=false
 ARCHIVE_FILE=""
+INTERACTIVE_MODE=false
 
 # Argument processing
 while [[ $# -gt 0 ]]; do
@@ -88,6 +90,10 @@ while [[ $# -gt 0 ]]; do
             fi
             ARCHIVE_FILE="$2"
             shift 2
+            ;;
+        -i|--interactive)
+            INTERACTIVE_MODE=true
+            shift
             ;;
         --)
             shift
@@ -261,6 +267,16 @@ process_urls() {
     fi
 }
 
+# Interactive mode assistant
+run_interactive_mode() {
+    # Trap SIGINT inside interactive mode
+    trap 'echo -e "\n${YELLOW}Operation interrupted by user.${NC}"; exit 130' SIGINT
+    
+    echo -e "${BLUE}Starting interactive assistant...${NC}"
+    # Implementation will be in TICKET-006B
+    echo -e "${YELLOW}Interactive mode is currently a skeleton.${NC}"
+}
+
 # Main function
 main() {
     # Display header
@@ -270,7 +286,7 @@ main() {
     echo ""
     
     # Argument processing
-    if [ $# -eq 0 ]; then
+    if [ $# -eq 0 ] && [ "$INTERACTIVE_MODE" = false ]; then
         echo -e "${RED}Error: No URL or file provided.${NC}" >&2
         show_help
         exit 1
@@ -282,6 +298,11 @@ main() {
     
     # Create output directory
     create_output_dir
+    
+    if [ "$INTERACTIVE_MODE" = true ]; then
+        run_interactive_mode
+        return 0
+    fi
     
     if [ $# -eq 1 ] && [ -f "$1" ]; then
         # If single argument and it's a file, treat as URL file
