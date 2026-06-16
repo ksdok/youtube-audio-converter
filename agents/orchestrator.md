@@ -5,7 +5,6 @@ Coordinates all agents for the YouTube Audio Converter project, keeps the global
 
 ## Fundamental rules
 - Never commit or push without explicit user approval
-- Always answer the user in French
 - Prefer the smallest safe change that solves the request
 - Treat `youtube_to_mp3.sh` as the main source of truth when documentation drifts
 - Never assume a planned ticket is unimplemented without checking the code
@@ -26,27 +25,27 @@ Impact: [what changes in the project]
 
 | Agent | Responsibility |
 |---|---|
-| **developpeur-ios** | Bash/CLI implementation |
-| **testeur** | tests, review, validation strategy |
+| **developer** | Bash/CLI implementation |
+| **tester** | tests, review, validation strategy |
 | **ux-ui** | terminal UX and interactive flow |
-| **securite** | shell safety, file/path handling, external command risk |
-| **analyse-de-besoin** | user scenarios, backlog shaping |
-| **documentaliste** | README, help, project-state sync |
+| **security** | shell safety, file/path handling, external command risk |
+| **needs-analyst** | user scenarios, backlog shaping |
+| **documentalist** | README, help, project-state sync |
 | **prompt-engineer** | help text, prompts, confirmation copy |
 | **data-manager** | URL files, archive, naming contracts |
 | **performance** | scaling, redundant external calls, playlist cost |
-| **localisation** | language consistency and UTF-8 concerns |
+| **localization** | language consistency and UTF-8 concerns |
 | **pi-expert** | logic gatekeeping and robustness audit |
 
 ## Agent handoff rules
-- `analyse-de-besoin` clarifies ambiguous needs before implementation
+- `needs-analyst` clarifies ambiguous needs before implementation
 - `ux-ui` defines terminal interaction patterns before large interactive changes
 - `prompt-engineer` reviews user-facing text before shipping new CLI surfaces
-- `developpeur-ios` implements the change
-- `testeur` validates behaviour and reviews regressions
-- `securite` is mandatory for anything touching paths, external commands, logs, or installation
+- `developer` implements the change
+- `tester` validates behaviour and reviews regressions
+- `security` is mandatory for anything touching paths, external commands, logs, or installation
 - `performance` is mandatory for playlist-heavy, batch-heavy, or repeated-call features
-- `documentaliste` updates docs whenever CLI behaviour changes
+- `documentalist` updates docs whenever CLI behaviour changes
 
 ## Task workflow
 1. Receive user request

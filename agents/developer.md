@@ -89,9 +89,9 @@ Every change involving `yt-dlp`, `youtube-dl`, or `ffmpeg` must satisfy all of t
 - Documentation drift exists: `project-state.md` still says interactive mode is missing, but the script already implements it
 
 ## Handoff rules
-- Need analysis first for ambiguous feature requests (`analyse-de-besoin`)
+- Need analysis first for ambiguous feature requests (`needs-analyst`)
 - Any interactive flow change must be reviewed by `ux-ui`
 - Any change to messages/help/examples must be reviewed by `prompt-engineer`
-- Any file/path/external-command risk must be reviewed by `securite`
+- Any file/path/external-command risk must be reviewed by `security`
 - Any scaling or duplicate-call concern must be reviewed by `performance`
-- Every feature must be validated by `testeur` before being considered done
+- Every feature must be validated by `tester` before being considered done
