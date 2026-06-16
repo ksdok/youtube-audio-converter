@@ -1,462 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# youtube_to_mp3.sh — Extract audio from YouTube videos
+# Entry point: sources all modules and delegates to main().
 
 set -euo pipefail
 
-# Script to extract audio from YouTube videos and convert them to audio files
-# Usage: ./youtube_to_mp3.sh urls.txt
-#        ./youtube_to_mp3.sh url1 url2 url3...
+# ── Resolve script directory ───────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="${SCRIPT_DIR}/lib"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# ── Source modules ─────────────────────────────────────────────────────
+source "${LIB_DIR}/constants.sh"
+source "${LIB_DIR}/utils.sh"
+source "${LIB_DIR}/cli.sh"
+source "${LIB_DIR}/dependencies.sh"
+source "${LIB_DIR}/download.sh"
+source "${LIB_DIR}/interactive.sh"
 
-# Function to display help
-show_help() {
-    echo "Usage: $0 [OPTIONS] [URLS...|FILE]"
-    echo ""
-    echo "Options:"
-    echo "  -h, --help     Display this help"
-    echo "  -o, --output   Output directory (default: ./mp3)"
-    echo "  -f, --format   Output audio format (default: mp3)"
-    echo "  --playlist     Process YouTube playlists (default: process single video only)"
-    echo "  --archive FILE Use yt-dlp download archive to avoid duplicates"
-    echo "  -i, --interactive Start the interactive assistant"
-    echo ""
-    echo "Examples:"
-    echo "  $0 https://www.youtube.com/watch?v=example1 https://www.youtube.com/watch?v=example2"
-    echo "  $0 urls.txt"
-    echo "  $0 -o /path/to/directory urls.txt"
-    echo "  $0 --playlist https://www.youtube.com/playlist?list=..."
-    echo "  $0 --archive downloaded.txt urls.txt"
-}
+# ── Main ───────────────────────────────────────────────────────────────
 
-is_valid_url() {
-    local url="$1"
-
-    case "$url" in
-        *://www.youtube.com/playlist*|*://youtube.com/playlist*|*://music.youtube.com/playlist*)
-            return 0
-            ;;
-        http://www.youtube.com/watch\?*|https://www.youtube.com/watch\?*|http://youtube.com/watch\?*|https://youtube.com/watch\?*|http://music.youtube.com/watch\?*|https://music.youtube.com/watch\?*|http://youtu.be/*|https://youtu.be/*|http://www.youtube.com/shorts/*|https://www.youtube.com/shorts/*|http://youtube.com/shorts/*|https://youtube.com/shorts/*|http://www.youtube.com/live/*|https://www.youtube.com/live/*|http://youtube.com/live/*|https://youtube.com/live/*)
-            return 0
-            ;;
-        *)
-            return 1
-            ;;
-    esac
-}
-
-# Default values
-OUTPUT_DIR="./mp3"
-AUDIO_FORMAT="mp3"
-PLAYLIST_MODE=false
-ARCHIVE_FILE=""
-INTERACTIVE_MODE=false
-
-# Argument processing
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-        -o|--output)
-            if [ $# -lt 2 ]; then
-                echo -e "${RED}Error: option $1 requires an output directory.${NC}" >&2
-                exit 1
-            fi
-            OUTPUT_DIR="$2"
-            shift 2
-            ;;
-        -f|--format)
-            if [ $# -lt 2 ]; then
-                echo -e "${RED}Error: option $1 requires an audio format.${NC}" >&2
-                exit 1
-            fi
-            AUDIO_FORMAT="$2"
-            shift 2
-            ;;
-        --playlist)
-            PLAYLIST_MODE=true
-            shift
-            ;;
-        --archive)
-            if [ $# -lt 2 ]; then
-                echo -e "${RED}Error: option $1 requires a file path.${NC}" >&2
-                exit 1
-            fi
-            ARCHIVE_FILE="$2"
-            shift 2
-            ;;
-        -i|--interactive)
-            INTERACTIVE_MODE=true
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        -*)
-            echo -e "${RED}Unknown option: $1${NC}" >&2
-            show_help
-            exit 1
-            ;;
-        *)
-            break
-            ;;
-    esac
-done
-
-# Dependency check
-check_dependencies() {
-    echo -e "${BLUE}Checking dependencies...${NC}"
-    
-    if ! command -v youtube-dl &> /dev/null && ! command -v yt-dlp &> /dev/null; then
-        echo -e "${RED}Error: Neither youtube-dl nor yt-dlp is installed.${NC}" >&2
-        echo "yt-dlp installation recommended:"
-        echo "  macOS: brew install yt-dlp"
-        echo "  Ubuntu/Debian: sudo apt install yt-dlp"
-        echo "  Fedora: sudo dnf install yt-dlp"
-        echo "  Or via pip: pip install yt-dlp"
-        exit 1
-    fi
-    
-    if ! command -v ffmpeg &> /dev/null; then
-        echo -e "${RED}Error: ffmpeg is not installed.${NC}" >&2
-        echo "Required installation:"
-        echo "  macOS: brew install ffmpeg"
-        echo "  Ubuntu/Debian: sudo apt install ffmpeg"
-        echo "  Fedora: sudo dnf install ffmpeg"
-        exit 1
-    fi
-    
-    # Use yt-dlp if available, otherwise youtube-dl
-    if command -v yt-dlp &> /dev/null; then
-        YOUTUBE_DL="yt-dlp"
-    else
-        YOUTUBE_DL="youtube-dl"
-    fi
-    
-    echo -e "${GREEN}Dependencies verified successfully.${NC}"
-    echo -e "${BLUE}Using: $YOUTUBE_DL${NC}"
-}
-
-# Create output directory
-create_output_dir() {
-    if [ ! -d "$OUTPUT_DIR" ]; then
-        echo -e "${BLUE}Creating output directory: $OUTPUT_DIR${NC}"
-        mkdir -p -- "$OUTPUT_DIR"
-    fi
-}
-
-# Process single URL
-process_url() {
-    local url="$1"
-    local index="$2"
-    
-    printf '%bProcessing video %s:%b %s\n' "$YELLOW" "$index" "$NC" "$url"
-
-    if ! is_valid_url "$url"; then
-        printf '%bInvalid or unsupported YouTube URL:%b %s\n' "$RED" "$NC" "$url" >&2
-        return 1
-    fi
-    
-    # Extract video title
-    local title
-    title=$($YOUTUBE_DL --no-playlist --get-title -- "$url" 2>/dev/null | head -n 1) || title=""
-    
-    if [ -z "$title" ]; then
-        title="video_$index"
-    fi
-    
-    printf '%bTitle:%b %s\n' "$BLUE" "$NC" "$title"
-    
-    # Build yt-dlp arguments
-    local playlist_flag="--no-playlist"
-    if [ "$PLAYLIST_MODE" = true ]; then
-        playlist_flag="--yes-playlist"
-    fi
-    
-    local yt_args=("$playlist_flag" "--extract-audio" "--audio-format" "$AUDIO_FORMAT" "--audio-quality" "0" "--output" "$OUTPUT_DIR/%(title).100s [%(id)s].%(ext)s" "--" "$url")
-    
-    # Add archive flag if provided
-    if [ -n "$ARCHIVE_FILE" ]; then
-        yt_args=("--download-archive" "$ARCHIVE_FILE" "${yt_args[@]}")
-    fi
-    
-    if $YOUTUBE_DL "${yt_args[@]}"; then
-        echo -e "${GREEN}✓ Conversion completed to format $AUDIO_FORMAT${NC}"
-    else
-        echo -e "${RED}✗ Conversion failed for: $url${NC}" >&2
-        return 1
-    fi
-}
-
-# Process URLs from file
-process_file() {
-    local file="$1"
-    
-    if [ ! -f "$file" ]; then
-        echo -e "${RED}Error: File $file does not exist.${NC}" >&2
-        exit 1
-    fi
-    
-    echo -e "${BLUE}Reading URLs from: $file${NC}"
-    
-    local urls=()
-    while IFS= read -r line || [ -n "$line" ]; do
-        # Skip empty lines and comments
-        if [[ "$line" =~ ^[[:space:]]*$ || "$line" =~ ^[[:space:]]*# ]]; then
-            continue
-        else
-            urls+=("$line")
-        fi
-    done < "$file"
-    
-    if [ "${#urls[@]}" -eq 0 ]; then
-        echo -e "${RED}No URLs to process.${NC}" >&2
-        exit 1
-    fi
-    
-    process_urls "${urls[@]}"
-}
-
-# Process URLs
-process_urls() {
-    local urls=("$@")
-    local total=${#urls[@]}
-    
-    if [ "$total" -eq 0 ]; then
-        echo -e "${RED}No URLs to process.${NC}" >&2
-        exit 1
-    fi
-    
-    echo -e "${BLUE}Processing $total video(s)...${NC}"
-    
-    local success_count=0
-    local fail_count=0
-    
-    for i in "${!urls[@]}"; do
-        local url="${urls[$i]}"
-        local index=$((i+1))
-        
-        if process_url "$url" "$index"; then
-            ((success_count+=1))
-        else
-            ((fail_count+=1))
-        fi
-        
-        echo ""  # Blank line to separate processing
-    done
-    
-    # Summary
-    echo -e "${BLUE}=== Summary ===${NC}"
-    echo -e "${GREEN}Success: $success_count${NC}"
-    echo -e "${RED}Failures: $fail_count${NC}"
-    echo -e "${BLUE}Total: $total${NC}"
-    
-    if [ "$fail_count" -eq 0 ]; then
-        echo -e "${GREEN}All conversions succeeded!${NC}"
-        echo -e "${BLUE}Audio files available in: $OUTPUT_DIR${NC}"
-    else
-        echo -e "${YELLOW}Some conversions failed. Check the error messages above.${NC}"
-        return 1
-    fi
-}
-
-# Interactive mode assistant
-run_interactive_mode() {
-    # Trap SIGINT inside interactive mode
-    trap 'echo -e "\n${YELLOW}Operation interrupted by user.${NC}"; exit 130' SIGINT
-    
-    echo -e "${BLUE}Starting interactive assistant...${NC}"
-    
-    # --- Utility function for prompts ---
-    prompt_user() {
-        local question="$1"
-        local default="$2"
-        local response
-        
-        if [ -n "$default" ]; then
-            printf '%b%s [%s]:%b ' "$BLUE" "$question" "$default" "$NC"
-        else
-            printf '%b%s:%b ' "$BLUE" "$question" "$NC"
-        fi
-        
-        read -r response
-        printf '%s\n' "${response:-$default}"
-    }
-
-    # --- Source Collection ---
-    echo -e "${YELLOW}Step 1: Source selection${NC}"
-    while true; do
-        echo "Choose source type:"
-        echo "1) Single URL"
-        echo "2) Multiple URLs (enter one per line, empty line to finish)"
-        echo "3) URL file"
-        echo "q) Quit"
-        
-        read -r -p "Choice [1-3/q]: " source_choice
-        
-        case "$source_choice" in
-            1)
-                while true; do
-                    url=$(prompt_user "Enter YouTube URL" "")
-                    if [ -z "$url" ]; then
-                        echo -e "${RED}URL cannot be empty.${NC}"
-                        continue
-                    fi
-                    if is_valid_url "$url"; then
-                        INTERACTIVE_SOURCES=("$url")
-                        break
-                    else
-                        echo -e "${RED}Invalid YouTube URL. Please try again.${NC}"
-                    fi
-                done
-                break
-                ;;
-            2)
-                echo "Enter URLs (one per line). Press Enter on an empty line to finish."
-                INTERACTIVE_SOURCES=()
-                while true; do
-                    read -r -p "URL: " url
-                    [ -z "$url" ] && break
-                    if is_valid_url "$url"; then
-                        INTERACTIVE_SOURCES+=("$url")
-                    else
-                        echo -e "${RED}Invalid URL skipped.${NC}"
-                    fi
-                done
-                if [ "${#INTERACTIVE_SOURCES[@]}" -eq 0 ]; then
-                    echo -e "${RED}No valid URLs entered.${NC}"
-                    continue
-                fi
-                break
-                ;;
-            3)
-                while true; do
-                    file_path=$(prompt_user "Enter path to URL file" "")
-                    if [ -z "$file_path" ]; then
-                        echo -e "${RED}File path cannot be empty.${NC}"
-                        continue
-                    fi
-                    if [ -f "$file_path" ]; then
-                        INTERACTIVE_SOURCE_FILE="$file_path"
-                        INTERACTIVE_SOURCES=()
-                        break
-                    else
-                        echo -e "${RED}File not found: $file_path${NC}"
-                    fi
-                done
-                break
-                ;;
-            q)
-                echo -e "${YELLOW}Exiting assistant.${NC}"
-                exit 0
-                ;;
-            *)
-                echo -e "${RED}Invalid choice.${NC}"
-                ;;
-        esac
-    done
-
-    # --- Playlist Logic ---
-    # Check if any source is a playlist
-    local has_playlist=false
-    if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
-        # Simple grep to see if file contains playlist URLs, ignoring comments
-        if grep -v '^[[:space:]]*#' "$INTERACTIVE_SOURCE_FILE" | grep -q "playlist"; then
-            has_playlist=true
-        fi
-    else
-        for url in "${INTERACTIVE_SOURCES[@]}"; do
-            if [[ "$url" == *playlist* ]]; then
-                has_playlist=true
-                break
-            fi
-        done
-    fi
-
-    if [ "$has_playlist" = true ]; then
-        echo -e "${YELLOW}Playlist detected!${NC}"
-        playlist_choice=$(prompt_user "Download entire playlist? (y/n)" "y")
-        if [[ "$playlist_choice" =~ ^[Yy]$ ]]; then
-            PLAYLIST_MODE=true
-        else
-            PLAYLIST_MODE=false
-        fi
-    fi
-
-    # --- Configuration ---
-    echo -e "\n${YELLOW}Step 2: Configuration${NC}"
-    AUDIO_FORMAT=$(prompt_user "Output audio format" "$AUDIO_FORMAT")
-    OUTPUT_DIR=$(prompt_user "Output directory" "$OUTPUT_DIR")
-    ARCHIVE_FILE=$(prompt_user "Archive file (leave empty to disable)" "$ARCHIVE_FILE")
-
-    # --- Confirmation and Launch ---
-    echo -e "\n${BLUE}=== Final Configuration Summary ===${NC}"
-    if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
-        echo -e "Source: ${INTERACTIVE_SOURCE_FILE}"
-    else
-        echo -e "Source: ${#INTERACTIVE_SOURCES[@]} URL(s): ${INTERACTIVE_SOURCES[*]}"
-    fi
-    echo -e "Format: ${YELLOW}$AUDIO_FORMAT${NC}"
-    echo -e "Directory: ${YELLOW}$OUTPUT_DIR${NC}"
-    echo -e "Playlist Mode: ${YELLOW}$PLAYLIST_MODE${NC}"
-    echo -e "Archive File: ${YELLOW}${ARCHIVE_FILE:-None}${NC}"
-    echo -e "${BLUE}=====================================${NC}"
-    
-    confirm=$(prompt_user "Confirm and start download?" "y")
-    if [[ "$confirm" =~ ^[Yy]([Ee][Ss])?$ ]]; then
-        echo -e "\n${GREEN}Starting conversion...${NC}\n"
-        if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
-            process_file "$INTERACTIVE_SOURCE_FILE"
-        else
-            process_urls "${INTERACTIVE_SOURCES[@]}"
-        fi
-    else
-        echo -e "\n${YELLOW}Operation cancelled by user.${NC}"
-    fi
-}
-
-# Main function
 main() {
-    # Display header
-    echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}  YouTube Audio Converter${NC}"
-    echo -e "${BLUE}========================================${NC}"
+    log_header "========================================"
+    log_header "  YouTube Audio Converter"
+    log_header "========================================"
     echo ""
-    
-    # Argument processing
-    if [ $# -eq 0 ] && [ "$INTERACTIVE_MODE" = false ]; then
-        echo -e "${RED}Error: No URL or file provided.${NC}" >&2
-        show_help
-        exit 1
+
+    # Parse CLI arguments → sets CONFIG_* variables
+    parse_args "$@"
+
+    # Validate that we have something to process (unless interactive)
+    if [ "${#CONFIG_ARGS[@]}" -eq 0 ] && [ "$CONFIG_INTERACTIVE" = false ]; then
+        log_error "No URL or file provided."
+        show_help >&2
+        exit "$EXIT_INVALID_ARG"
     fi
 
-    # Check dependencies after minimal argument validation
-    # to return most useful CLI errors first
+    # Check dependencies → sets YOUTUBE_DL
     check_dependencies
-    
-    # Create output directory
-    create_output_dir
-    
-    if [ "$INTERACTIVE_MODE" = true ]; then
+
+    # Ensure output directory exists
+    ensure_output_dir "$CONFIG_OUTPUT_DIR"
+
+    # Interactive mode delegates entirely to the interactive module
+    if [ "$CONFIG_INTERACTIVE" = true ]; then
         run_interactive_mode
         return 0
     fi
-    
-    if [ $# -eq 1 ] && [ -f "$1" ]; then
-        # If single argument and it's a file, treat as URL file
-        process_file "$1"
+
+    # Determine input source and process
+    if [ "${#CONFIG_ARGS[@]}" -eq 1 ] && [ -f "${CONFIG_ARGS[0]}" ]; then
+        process_file "${CONFIG_ARGS[0]}"
     else
-        # Otherwise, treat all arguments as URLs
-        process_urls "$@"
+        process_urls "${CONFIG_ARGS[@]}"
     fi
 }
 
-# Execute
 main "$@"
