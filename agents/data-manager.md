@@ -59,14 +59,14 @@ If `--log FILE` is implemented:
 
 ## Upcoming data work
 
-### Future — Test fixtures
+### Future — Test fixtures (`TICKET-010`)
 If a test suite is added, this agent owns:
 - sample `urls.txt` fixtures
 - comment/blank-line fixtures
 - invalid URL fixtures
 - expected output naming examples
 
-### Future — Installation metadata
+### Future — Installation metadata (`TICKET-007`)
 If `install.sh` is added, define:
 - default target path
 - command name (`youtube-to-mp3` or equivalent)

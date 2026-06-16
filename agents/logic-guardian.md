@@ -37,6 +37,7 @@ Consult these first:
 - `agents/security.md`
 - `agents/performance.md`
 - `agents/tester.md`
+- `agents/orchestrator.md`
 - `README.md`
 
 ## Audit checklist

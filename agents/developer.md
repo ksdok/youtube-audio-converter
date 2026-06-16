@@ -86,7 +86,7 @@ Every change involving `yt-dlp`, `youtube-dl`, or `ffmpeg` must satisfy all of t
 ## Blocking for release quality
 - No automated tests yet
 - No CI validation yet
-- Documentation drift exists: `project-state.md` still says interactive mode is missing, but the script already implements it
+- Documentation must stay in sync with future CLI changes to avoid new drift
 
 ## Handoff rules
 - Need analysis first for ambiguous feature requests (`needs-analyst`)

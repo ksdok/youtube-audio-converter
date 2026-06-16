@@ -37,7 +37,7 @@ This project provides a Bash script, `youtube_to_mp3.sh`, that extracts audio fr
 - `agents/` — project-specific agent definitions adapted for this repository
 
 ### Important note
-When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth. For example, the interactive mode is already implemented in the script.
+When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth. The interactive mode is already implemented in the script and the documentation is now aligned with that reality.
 
 ## Complexity scale
 - **XS** — trivial change, very low risk
@@ -50,11 +50,15 @@ When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth
 
 ### TICKET-001 — Rename the main documentation to `README.md`
 **Complexity:** XS  
-**Status:** Done
+**Status:** Done (`1003a41`)
 
-Result:
+Description:
+Rename `README_YOUTUBE_MP3.md` to `README.md` so GitHub displays the documentation automatically on the repository page.
+
+Acceptance criteria:
 - `README.md` exists at the repository root
-- The main documentation is displayed correctly by GitHub
+- `README_YOUTUBE_MP3.md` is no longer needed
+- GitHub displays the documentation correctly
 
 ---
 
@@ -62,22 +66,48 @@ Result:
 **Complexity:** L  
 **Status:** Partially done
 
-Completed:
-- **TICKET-002A** — Playlist URLs are recognized
-- **TICKET-002B** — `--playlist` enables full playlist processing
+Description:
+Allow the script to process a full YouTube playlist without breaking the safer default behaviour that limits normal video URLs to a single video via `--no-playlist`.
 
-Still open:
-- **TICKET-002C** — Add playlist index prefixes to output filenames
+#### TICKET-002A — Detect playlist URLs
+**Complexity:** S  
+**Status:** Done (`1003a41`)
+
+Acceptance criteria:
+- `https://www.youtube.com/playlist?list=...` is recognized as supported
+- `https://music.youtube.com/playlist?list=...` is recognized as supported
+- Non-YouTube URLs are still rejected
+
+#### TICKET-002B — Add a `--playlist` option
+**Complexity:** M  
+**Status:** Done (`86fb7cb`)
+
+Acceptance criteria:
+- `./youtube_to_mp3.sh --playlist "URL_PLAYLIST"` downloads the playlist
+- `./youtube_to_mp3.sh "URL_VIDEO_WITH_LIST"` still downloads only one video by default
+- `--help` documents the option
+
+#### TICKET-002C — Add playlist index prefixes to filenames
+**Complexity:** S  
+**Status:** Planned
+
+Acceptance criteria:
+- Playlist items are named with an order prefix such as `01 - Title [id].mp3`
+- Single-video downloads keep the current naming format
 
 ---
 
 ### TICKET-003 — Add a duplicate-prevention archive
 **Complexity:** M  
-**Status:** Done
+**Status:** Done (`86fb7cb`)
 
-Result:
-- `--archive FILE` passes a download archive to `yt-dlp`
-- Re-running the same batch or playlist can skip previously processed items
+Description:
+Add an option that forwards `--download-archive` to `yt-dlp` so already processed videos are not downloaded again.
+
+Acceptance criteria:
+- The user can provide a custom archive file
+- Without the option, behaviour stays unchanged
+- A re-run playlist or batch skips items already present in the archive
 
 ---
 
@@ -85,10 +115,34 @@ Result:
 **Complexity:** L  
 **Status:** Done
 
-Completed:
-- **TICKET-006A** — `-i, --interactive` starts the assistant
-- **TICKET-006B** — The assistant collects source, format, output directory, and archive settings
-- **TICKET-006C** — A final confirmation step is shown before processing starts
+Description:
+Allow a non-technical user to run the script without knowing the CLI flags in advance.
+
+#### TICKET-006A — Add `--interactive`
+**Complexity:** S  
+**Status:** Done
+
+Acceptance criteria:
+- `./youtube_to_mp3.sh --interactive` starts the assistant
+- `--help` documents the option
+
+#### TICKET-006B — Ask for source, format, and output directory
+**Complexity:** M  
+**Status:** Done
+
+Acceptance criteria:
+- The user can choose a source type interactively
+- The user can accept default values with Enter
+- The chosen values are reused by the normal processing flow
+
+#### TICKET-006C — Add a final confirmation before download
+**Complexity:** S  
+**Status:** Done
+
+Acceptance criteria:
+- The script shows a summary of the selected source, format, output directory, playlist mode, and archive file
+- `y` or `yes` starts processing
+- Any other answer cancels cleanly
 
 ---
 
@@ -96,34 +150,33 @@ Completed:
 **Complexity:** S  
 **Status:** Done
 
-Result:
-- The README includes examples for single URLs, multiple URLs, URL files, playlists, custom output folders, and archives
-- Troubleshooting and prerequisites are documented
+Description:
+Expand the documentation with the main usage patterns and the currently supported options.
+
+Acceptance criteria:
+- Example for a single video
+- Example for multiple videos
+- Example with a URL file
+- Example with a playlist
+- Example with a custom output folder
+- Example with a duplicate-prevention archive
+- Expanded troubleshooting section
 
 ---
 
 ### TICKET-009 — Add an open-source license
 **Complexity:** XS  
-**Status:** Done
-
-Result:
-- `LICENSE` exists
-- The repository is clearly distributed under the MIT License
-
-## Active backlog
-
-### TICKET-002C — Add playlist index prefixes to filenames
-**Complexity:** S  
-**Status:** Planned
+**Status:** Done (`1003a41`)
 
 Description:
-When playlist mode is enabled, use an output template that includes the playlist index.
+Add a `LICENSE` file so repository usage rights are explicit.
 
 Acceptance criteria:
-- Playlist items are saved with an index prefix such as `01 - Title [id].mp3`
-- Single-video downloads keep the current naming format
+- `LICENSE` exists
+- The README mentions the license
+- GitHub detects the repository license
 
----
+## Active backlog
 
 ### TICKET-004 — Add a metadata/embed option
 **Complexity:** M  
@@ -182,15 +235,37 @@ youtube-to-mp3 urls.txt
 **Complexity:** L  
 **Status:** Planned
 
-Recommended split:
-- **TICKET-010A** — Create a shell test structure
-- **TICKET-010B** — Test help output and CLI errors
-- **TICKET-010C** — Test URL validation
+Description:
+Add tests to protect the script behaviour, especially around argument parsing and URL validation.
+
+#### TICKET-010A — Create a shell test structure
+**Complexity:** M  
+**Status:** Planned
 
 Acceptance criteria:
-- A minimal test command can be run locally
+- A `tests/` directory exists
+- A minimal local test command can be run successfully
 - The test command is documented
-- Help, missing arguments, unknown options, and URL validation are covered
+
+#### TICKET-010B — Test help output and CLI errors
+**Complexity:** S  
+**Status:** Planned
+
+Acceptance criteria:
+- `--help` exits successfully
+- Missing arguments return an error
+- Unknown options return an error
+
+#### TICKET-010C — Test URL validation
+**Complexity:** M  
+**Status:** Planned
+
+Acceptance criteria:
+- YouTube video URLs are accepted
+- Shorts URLs are accepted
+- Live URLs are accepted
+- Playlist URLs are accepted because playlist support is implemented
+- Non-YouTube URLs are rejected
 
 ---
 
@@ -266,7 +341,7 @@ Acceptance criteria:
 9. TICKET-014 — Clear `yt-dlp` update workflow
 
 ## Release direction
-The next useful project milestone should focus on reliability and maintainability rather than feature breadth:
+The next useful milestone should focus on reliability and maintainability rather than feature breadth:
 - automated tests
 - CI validation
 - dry-run support

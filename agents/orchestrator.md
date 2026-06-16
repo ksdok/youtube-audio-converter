@@ -5,6 +5,7 @@ Coordinates all agents for the YouTube Audio Converter project, keeps the global
 
 ## Fundamental rules
 - Never commit or push without explicit user approval
+- Answer in the user's language
 - Prefer the smallest safe change that solves the request
 - Treat `youtube_to_mp3.sh` as the main source of truth when documentation drifts
 - Never assume a planned ticket is unimplemented without checking the code
@@ -18,7 +19,7 @@ Proposed action: [description]
 Agent: [agent name]
 Reason: [why]
 Impact: [what changes in the project]
-→ Validate? (oui / non / modifier)
+→ Validate? (yes / no / modify)
 ---
 
 ## Available agents
@@ -35,7 +36,7 @@ Impact: [what changes in the project]
 | **data-manager** | URL files, archive, naming contracts |
 | **performance** | scaling, redundant external calls, playlist cost |
 | **localization** | language consistency and UTF-8 concerns |
-| **pi-expert** | logic gatekeeping and robustness audit |
+| **logic-guardian** | logic gatekeeping and robustness audit |
 
 ## Agent handoff rules
 - `needs-analyst` clarifies ambiguous needs before implementation
@@ -68,6 +69,6 @@ If blocked:
 - Main entrypoint: `youtube_to_mp3.sh`
 - Core features implemented in code: single URL, multi-URL, URL file input, playlist opt-in, archive support, output folder/format options, dependency checks, interactive assistant, execution summary
 - Main unresolved product items: metadata embedding, dry-run, install script, tests, CI, logs, playlist item limits, clearer `yt-dlp` update path
-- Current documentation drift: `project-state.md` still says interactive mode is not implemented, but the script already contains `-i/--interactive`
+- Documentation was recently normalized to English and aligned with the implemented interactive mode; keep it synced with future CLI changes
 - No automated tests or CI gates are present yet
 - Generated audio output lives under `mp3/` by default and should remain outside version control

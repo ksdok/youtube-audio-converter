@@ -42,6 +42,7 @@ Must contain:
 - current project status based on code reality
 - backlog with acceptance criteria
 - recommended priority order
+- commit references for completed tickets when known
 - notes when a ticket is implemented but the backlog was not yet synced
 
 ### changelog.md (if created later)
@@ -59,4 +60,4 @@ Use Keep a Changelog style:
 - `--help`, `README.md`, and `project-state.md` must not contradict each other
 - Every new flag needs at least one usage example
 - If a ticket is implemented early, sync the documentation immediately
-- Current known drift to fix on next doc pass: interactive mode exists in `youtube_to_mp3.sh`, but `project-state.md` still lists it as missing/planned
+- Preserve ticket traceability: keep commit references and sub-ticket detail when they exist
