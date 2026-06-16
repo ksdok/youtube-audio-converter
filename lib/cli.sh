@@ -36,10 +36,11 @@ EOF
 
 require_option_argument() {
     local option="$1"
-    local remaining_args="$2"
+    local arg_count="$2"
+    local expected_value="${3:-an argument}"
 
-    if [ "$remaining_args" -lt 2 ]; then
-        log_error "Option ${option} requires an argument."
+    if [ "$arg_count" -lt 2 ]; then
+        log_error "Option ${option} requires ${expected_value}."
         exit "$EXIT_INVALID_ARG"
     fi
 
@@ -75,13 +76,13 @@ parse_args() {
                 exit "$EXIT_OK"
                 ;;
             -o|--output)
-                require_option_argument "$1" "$#"
+                require_option_argument "$1" "$#" "a directory"
                 reject_url_option_argument "$1" "$2"
                 CONFIG_OUTPUT_DIR="$2"
                 shift 2
                 ;;
             -f|--format)
-                require_option_argument "$1" "$#"
+                require_option_argument "$1" "$#" "a format"
                 reject_url_option_argument "$1" "$2"
                 CONFIG_FORMAT="$2"
                 shift 2
@@ -91,7 +92,7 @@ parse_args() {
                 shift
                 ;;
             --archive)
-                require_option_argument "$1" "$#"
+                require_option_argument "$1" "$#" "a file path"
                 reject_url_option_argument "$1" "$2"
                 CONFIG_ARCHIVE_FILE="$2"
                 shift 2
