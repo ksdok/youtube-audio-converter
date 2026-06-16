@@ -34,6 +34,30 @@ EOF
 # Sets global config variables (with defaults from constants.sh).
 # Remaining positional args (URLs/files) are left in CONFIG_ARGS.
 
+require_option_argument() {
+    local option="$1"
+    local remaining_args="$2"
+
+    if [ "$remaining_args" -lt 2 ]; then
+        log_error "Option ${option} requires an argument."
+        exit "$EXIT_INVALID_ARG"
+    fi
+
+    return 0
+}
+
+reject_url_option_argument() {
+    local option="$1"
+    local value="$2"
+
+    if is_valid_url "$value"; then
+        log_error "Option ${option} expected its own argument before the YouTube URL."
+        exit "$EXIT_INVALID_ARG"
+    fi
+
+    return 0
+}
+
 parse_args() {
     # Reset to defaults
     CONFIG_OUTPUT_DIR="$DEFAULT_OUTPUT_DIR"
@@ -51,12 +75,14 @@ parse_args() {
                 exit "$EXIT_OK"
                 ;;
             -o|--output)
-                [ $# -lt 2 ] && { log_error "Option $1 requires a directory."; exit "$EXIT_INVALID_ARG"; }
+                require_option_argument "$1" "$#"
+                reject_url_option_argument "$1" "$2"
                 CONFIG_OUTPUT_DIR="$2"
                 shift 2
                 ;;
             -f|--format)
-                [ $# -lt 2 ] && { log_error "Option $1 requires a format."; exit "$EXIT_INVALID_ARG"; }
+                require_option_argument "$1" "$#"
+                reject_url_option_argument "$1" "$2"
                 CONFIG_FORMAT="$2"
                 shift 2
                 ;;
@@ -65,7 +91,8 @@ parse_args() {
                 shift
                 ;;
             --archive)
-                [ $# -lt 2 ] && { log_error "Option $1 requires a file path."; exit "$EXIT_INVALID_ARG"; }
+                require_option_argument "$1" "$#"
+                reject_url_option_argument "$1" "$2"
                 CONFIG_ARCHIVE_FILE="$2"
                 shift 2
                 ;;
