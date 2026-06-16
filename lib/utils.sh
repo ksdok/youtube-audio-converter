@@ -71,7 +71,7 @@ prompt_user() {
     local response
 
     if [ -n "$default" ]; then
-        printf '%b%s [%s]:%b ' "$BLUE" "$question" "$default" "$NC"
+        printf '%b%s [%s] (Enter to accept):%b ' "$BLUE" "$question" "$default" "$NC"
     else
         printf '%b%s:%b ' "$BLUE" "$question" "$NC"
     fi
