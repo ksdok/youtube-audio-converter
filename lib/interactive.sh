@@ -32,7 +32,7 @@ run_interactive_mode() {
 # assigning arrays through references in Bash 4.x.)
 
 _interactive_collect_source() {
-    log_step "Step 1: Source selection"
+    log_step "Source selection"
 
     while true; do
         echo "Choose source type:"
@@ -163,7 +163,7 @@ _interactive_check_playlists() {
 # ── Step 3: Configuration ─────────────────────────────────────────────
 
 _interactive_collect_config() {
-    log_step "Step 2: Configuration"
+    log_step "Configuration"
 
     CONFIG_FORMAT=$(prompt_user "Output audio format" "$CONFIG_FORMAT")
     CONFIG_OUTPUT_DIR=$(prompt_user "Output directory" "$CONFIG_OUTPUT_DIR")
