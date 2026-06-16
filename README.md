@@ -2,7 +2,7 @@
 
 A professional Bash script to extract audio from YouTube videos and convert them into audio files (MP3 by default) with the best possible quality.
 
-## 🚀 Features
+## Features
 
 - **Multi-source** : Convert a single URL, multiple URLs, or a text file.
 - **Playlist Mode** : Full support for YouTube and YouTube Music playlists (`--playlist`).
@@ -13,7 +13,7 @@ A professional Bash script to extract audio from YouTube videos and convert them
 - **Flexibility** : Configurable output directory and audio format.
 - **Robust** : Automatic dependency check (`yt-dlp`, `ffmpeg`) and error handling.
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 The script requires the following tools:
 
@@ -44,7 +44,7 @@ pip install yt-dlp
 
 > **Note**: `ffmpeg` must be installed as a system binary. The Python package `ffmpeg-python` is not sufficient.
 
-## 📖 Usage
+## Usage
 
 ### 1. Simple Download (single videos)
 For one or more videos:
@@ -89,7 +89,7 @@ To avoid re-downloading videos already converted in previous sessions:
 ```
 *Interactive mode guides you through source selection, playlist confirmation when needed, output format, output directory, archive selection, and a final confirmation step.*
 
-## ⚙️ CLI Options
+## CLI Options
 
 | Option | Description | Default Value |
 | :--- | :--- | :--- |
@@ -101,7 +101,7 @@ To avoid re-downloading videos already converted in previous sessions:
 | `-i, --interactive` | Start the interactive assistant | Disabled |
 | `--dry-run` | Preview what would be processed without downloading | Disabled |
 
-## 📄 URL File Format
+## URL File Format
 
 The script accepts simple text files. Empty lines and comments starting with `#` are ignored.
 
@@ -114,12 +114,12 @@ https://www.youtube.com/watch?v=def67890
 # https://www.youtube.com/watch?v=ghi11122
 ```
 
-## 📦 Output and Naming
+## Output and Naming
 
 Files are saved as: `Video Title [YouTube_ID].mp3`.
 Including the ID prevents overwriting files with the same title.
 
-## ⚠️ Remarks and Troubleshooting
+## Remarks and Troubleshooting
 
 ### Permission Issues
 If the script refuses to run, make it executable:
@@ -136,6 +136,6 @@ chmod +x youtube_to_mp3.sh
 ### Copyright
 The use of this script must comply with YouTube's Terms of Service and intellectual property rights.
 
-## ⚖️ License
+## License
 
 This project is distributed under the **MIT License**. See the `LICENSE` file for more details.
