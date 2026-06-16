@@ -17,10 +17,10 @@ This project provides a Bash script, `youtube_to_mp3.sh`, that extracts audio fr
 - Support YouTube playlists with explicit `--playlist` opt-in
 - Avoid duplicate downloads with `--archive FILE`
 - Provide an interactive assistant with `-i, --interactive`
+- Preview downloads without creating files via `--dry-run`
 - Keep generated audio out of Git via `.gitignore`
 
 ### Current limitations
-- No dry-run mode yet
 - No metadata/embed option yet
 - No automated test suite yet
 - No CI workflow yet
@@ -37,7 +37,7 @@ This project provides a Bash script, `youtube_to_mp3.sh`, that extracts audio fr
 - `agents/` — project-specific agent definitions adapted for this repository
 
 ### Important note
-When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth. The interactive mode is already implemented in the script and the documentation is now aligned with that reality.
+When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth. Keep the documentation in sync with the script.
 
 ## Complexity scale
 - **XS** — trivial change, very low risk
@@ -91,9 +91,7 @@ Acceptance criteria:
 **Complexity:** S  
 **Status:** Planned
 
-Acceptance criteria:
-- Playlist items are named with an order prefix such as `01 - Title [id].mp3`
-- Single-video downloads keep the current naming format
+This remaining sub-ticket is tracked in the Active backlog below.
 
 ---
 
@@ -111,6 +109,21 @@ Acceptance criteria:
 
 ---
 
+### TICKET-005 — Add a dry-run mode
+**Complexity:** M  
+**Status:** Done (`facaa7c`)
+
+Description:
+Add a `--dry-run` option to preview what would be processed without creating audio files.
+
+Acceptance criteria:
+- `./youtube_to_mp3.sh --dry-run URL` shows the detected title or titles
+- No audio file is created
+- Works with URL files
+- Works with playlists when combined with `--playlist`
+
+---
+
 ### TICKET-006 — Add an interactive mode
 **Complexity:** L  
 **Status:** Done
@@ -120,7 +133,7 @@ Allow a non-technical user to run the script without knowing the CLI flags in ad
 
 #### TICKET-006A — Add `--interactive`
 **Complexity:** S  
-**Status:** Done
+**Status:** Done (`987fef8`)
 
 Acceptance criteria:
 - `./youtube_to_mp3.sh --interactive` starts the assistant
@@ -128,7 +141,7 @@ Acceptance criteria:
 
 #### TICKET-006B — Ask for source, format, and output directory
 **Complexity:** M  
-**Status:** Done
+**Status:** Done (`c7fb7e0`)
 
 Acceptance criteria:
 - The user can choose a source type interactively
@@ -137,7 +150,7 @@ Acceptance criteria:
 
 #### TICKET-006C — Add a final confirmation before download
 **Complexity:** S  
-**Status:** Done
+**Status:** Done (`7b8aacc`)
 
 Acceptance criteria:
 - The script shows a summary of the selected source, format, output directory, playlist mode, and archive file
@@ -148,7 +161,7 @@ Acceptance criteria:
 
 ### TICKET-008 — Improve the README with complete examples
 **Complexity:** S  
-**Status:** Done
+**Status:** Done (`be7242d`)
 
 Description:
 Expand the documentation with the main usage patterns and the currently supported options.
@@ -178,6 +191,19 @@ Acceptance criteria:
 
 ## Active backlog
 
+### TICKET-002C — Add playlist index prefixes to filenames
+**Complexity:** S  
+**Status:** Planned
+
+Description:
+When playlist mode is enabled, use an output template that includes the playlist index.
+
+Acceptance criteria:
+- Playlist items are named with an order prefix such as `01 - Title [id].mp3`
+- Single-video downloads keep the current naming format
+
+---
+
 ### TICKET-004 — Add a metadata/embed option
 **Complexity:** M  
 **Status:** Planned
@@ -195,21 +221,6 @@ Acceptance criteria:
 - `./youtube_to_mp3.sh --metadata URL` embeds metadata when possible
 - Without `--metadata`, behaviour stays unchanged
 - The documentation explains format and `ffmpeg` limitations clearly
-
----
-
-### TICKET-005 — Add a dry-run mode
-**Complexity:** M  
-**Status:** Planned
-
-Description:
-Add a `--dry-run` option to preview what would be processed without creating audio files.
-
-Acceptance criteria:
-- `./youtube_to_mp3.sh --dry-run URL` shows the detected title or titles
-- No audio file is created
-- Works with URL files
-- Works with playlists when combined with `--playlist`
 
 ---
 
@@ -332,20 +343,19 @@ Acceptance criteria:
 ## Recommended implementation order
 1. TICKET-010 — Automated tests
 2. TICKET-011 — CI validation
-3. TICKET-005 — Dry-run mode
-4. TICKET-004 — Metadata embedding
-5. TICKET-007 — Local installer
-6. TICKET-012 — Optional log file
-7. TICKET-013 — Playlist item limit
-8. TICKET-002C — Playlist filename indexing
-9. TICKET-014 — Clear `yt-dlp` update workflow
+3. TICKET-004 — Metadata embedding
+4. TICKET-007 — Local installer
+5. TICKET-012 — Optional log file
+6. TICKET-013 — Playlist item limit
+7. TICKET-002C — Playlist filename indexing
+8. TICKET-014 — Clear `yt-dlp` update workflow
 
 ## Release direction
 The next useful milestone should focus on reliability and maintainability rather than feature breadth:
 - automated tests
 - CI validation
-- dry-run support
 - optional logging
 - installation ergonomics
+- metadata polish
 
 That path improves confidence in the script without making the core workflow unnecessarily complex.
