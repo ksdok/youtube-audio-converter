@@ -150,13 +150,16 @@ process_urls() {
     if [ "$CONFIG_DRY_RUN" = true ]; then
         log_header "Dry-run preview — ${total} video(s)"
         local i
+        local playlist_status="disabled"
+
+        [ "$CONFIG_PLAYLIST_MODE" = true ] && playlist_status="enabled"
+
         for i in "${!urls[@]}"; do
             _dry_run_url "${urls[$i]}" "$((i + 1))"
         done
         echo ""
-        log_info "Format: ${CONFIG_FORMAT} | Output: ${CONFIG_OUTPUT_DIR}"
+        log_info "Format: ${CONFIG_FORMAT} | Output: ${CONFIG_OUTPUT_DIR} | Playlist: ${playlist_status}"
         [ -n "$CONFIG_ARCHIVE_FILE" ] && log_info "Archive: ${CONFIG_ARCHIVE_FILE}"
-        [ "$CONFIG_PLAYLIST_MODE" = true ] && log_info "Playlist mode: enabled"
         return 0
     fi
 
