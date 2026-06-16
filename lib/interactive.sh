@@ -11,22 +11,19 @@ run_interactive_mode() {
     log_header "Starting interactive assistant..."
 
     # --- Step 1: Source ---
-    # INTERACTIVE_SOURCES and INTERACTIVE_SOURCE_FILE are set by
-    # _interactive_collect_source and used in subsequent steps.
-    # shellcheck disable=SC2034
-    local sources=()
-    # shellcheck disable=SC2034
-    local source_file=""
-    _interactive_collect_source sources source_file || return 1
+    # INTERACTIVE_SOURCES and INTERACTIVE_SOURCE_FILE are set as globals
+    # by _interactive_collect_source sub-functions and read by
+    # _interactive_check_playlists and _interactive_confirm_and_run.
+    _interactive_collect_source || return 1
 
     # --- Step 2: Playlist detection ---
-    _interactive_check_playlists sources source_file
+    _interactive_check_playlists
 
     # --- Step 3: Configuration ---
     _interactive_collect_config
 
     # --- Step 4: Confirmation ---
-    _interactive_confirm_and_run sources source_file
+    _interactive_confirm_and_run
 }
 
 # ── Step 1: Source collection ───────────────────────────────────────────

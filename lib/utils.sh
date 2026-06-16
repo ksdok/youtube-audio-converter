@@ -18,7 +18,7 @@ log_error() {
 }
 
 log_warn() {
-    printf '%b⚠ %b%b\n' "$YELLOW" "$*" "$NC"
+    printf '%b⚠ %b%b\n' "$YELLOW" "$*" "$NC" >&2
 }
 
 log_header() {
@@ -103,6 +103,7 @@ require_file() {
         log_error "File not readable: $file"
         return 1
     fi
+    return 0
 }
 
 # ── Output directory ───────────────────────────────────────────────────

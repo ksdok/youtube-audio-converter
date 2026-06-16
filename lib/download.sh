@@ -5,7 +5,8 @@
 # ── Build yt-dlp arguments ─────────────────────────────────────────────
 # Constructs the argument array for yt-dlp based on current configuration.
 # Args: $1=URL
-# Prints nothing; sets YDL_ARGS array in the calling scope.
+# Sets the global YDL_ARGS array. Must be consumed immediately by the
+# caller (process_url) before any subsequent call overwrites it.
 
 _build_ydl_args() {
     local url="$1"
@@ -75,8 +76,10 @@ process_url() {
     fi
 
     # --- Dry-run mode ---
+    # Dry-run preview is handled by process_urls() before this
+    # function is called. If we reach here in dry-run mode, skip download.
     if [ "$CONFIG_DRY_RUN" = true ]; then
-        return 0  # _dry_run_url already printed the preview
+        return 0
     fi
 
     # --- Extract title for progress display ---

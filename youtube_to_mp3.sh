@@ -43,15 +43,18 @@ main() {
     # Interactive mode delegates entirely to the interactive module
     if [ "$CONFIG_INTERACTIVE" = true ]; then
         run_interactive_mode
-        return 0
+        return $?
     fi
 
     # Determine input source and process
+    local result=0
     if [ "${#CONFIG_ARGS[@]}" -eq 1 ] && [ -f "${CONFIG_ARGS[0]}" ]; then
-        process_file "${CONFIG_ARGS[0]}"
+        process_file "${CONFIG_ARGS[0]}" || result=$?
     else
-        process_urls "${CONFIG_ARGS[@]}"
+        process_urls "${CONFIG_ARGS[@]}" || result=$?
     fi
+
+    return $result
 }
 
 main "$@"
