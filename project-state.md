@@ -19,6 +19,9 @@ This project provides a Bash script, `youtube_to_mp3.sh`, that extracts audio fr
 - Provide an interactive assistant with `-i, --interactive`
 - Preview downloads without creating files via `--dry-run`
 - Keep generated audio out of Git via `.gitignore`
+- Keep CLI help and early error output free of decorative banner noise
+- Show playlist state in dry-run summaries and clearer `[index/total]` batch progress output
+- Make interactive prompts clearer with unnumbered steps and explicit default-value hints
 
 ### Current limitations
 - No metadata/embed option yet
@@ -111,7 +114,7 @@ Acceptance criteria:
 
 ### TICKET-005 — Add a dry-run mode
 **Complexity:** M  
-**Status:** Done (`facaa7c`)
+**Status:** Done (`facaa7c`, `2914e6e`, `89cca2d` include recent UX polish)
 
 Description:
 Add a `--dry-run` option to preview what would be processed without creating audio files.
@@ -126,7 +129,7 @@ Acceptance criteria:
 
 ### TICKET-006 — Add an interactive mode
 **Complexity:** L  
-**Status:** Done
+**Status:** Done (`c0e991b`, `765708c` include recent UX polish)
 
 Description:
 Allow a non-technical user to run the script without knowing the CLI flags in advance.

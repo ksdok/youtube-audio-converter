@@ -7,6 +7,8 @@ A professional Bash script to extract audio from YouTube videos and convert them
 - **Multi-source** : Convert a single URL, multiple URLs, or a text file.
 - **Playlist Mode** : Full support for YouTube and YouTube Music playlists (`--playlist`).
 - **Anti-Duplicate** : Archiving system to avoid re-downloading already processed videos (`--archive`).
+- **Dry-Run Preview** : Preview titles, URLs, format, output folder, and playlist state without downloading (`--dry-run`).
+- **Interactive Assistant** : Guided mode for source selection and configuration (`-i`, `--interactive`).
 - **Maximum Quality** : Automatic extraction of the best available audio quality (quality 0).
 - **Flexibility** : Configurable output directory and audio format.
 - **Robust** : Automatic dependency check (`yt-dlp`, `ffmpeg`) and error handling.
@@ -75,6 +77,18 @@ To avoid re-downloading videos already converted in previous sessions:
 ./youtube_to_mp3.sh -o "./my_music" -f wav "https://www.youtube.com/watch?v=ID"
 ```
 
+### 6. Previewing Without Downloading
+```bash
+./youtube_to_mp3.sh --dry-run "https://www.youtube.com/watch?v=ID"
+```
+*The dry-run preview shows the detected title, source URL, target format, output directory, and playlist mode without creating audio files.*
+
+### 7. Using the Interactive Assistant
+```bash
+./youtube_to_mp3.sh --interactive
+```
+*Interactive mode guides you through source selection, playlist confirmation when needed, output format, output directory, archive selection, and a final confirmation step.*
+
 ## ⚙️ CLI Options
 
 | Option | Description | Default Value |
@@ -84,6 +98,8 @@ To avoid re-downloading videos already converted in previous sessions:
 | `-f, --format` | Audio format (`mp3`, `m4a`, `wav`, etc.) | `mp3` |
 | `--playlist` | Allows full download of a playlist | Disabled |
 | `--archive FILE` | File to track already downloaded videos | None |
+| `-i, --interactive` | Start the interactive assistant | Disabled |
+| `--dry-run` | Preview what would be processed without downloading | Disabled |
 
 ## 📄 URL File Format
 
