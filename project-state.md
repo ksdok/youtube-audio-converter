@@ -1,247 +1,176 @@
 # Project State — YouTube Audio Converter
 
-Dernière mise à jour : 2026-06-15
+Last updated: 2026-06-16
 
-## État actuel
+## Current status
 
-Le projet contient un script Bash `youtube_to_mp3.sh` permettant d'extraire l'audio de vidéos YouTube avec `yt-dlp` ou `youtube-dl`, puis de convertir le résultat avec `ffmpeg`.
+This project provides a Bash script, `youtube_to_mp3.sh`, that extracts audio from YouTube videos using `yt-dlp` (preferred) or `youtube-dl` (fallback), then converts the result with `ffmpeg`.
 
-Fonctionnalités déjà disponibles :
+### Implemented features
+- Convert one or more YouTube URLs to audio files
+- Read URLs from a text file
+- Ignore blank lines and `#` comments in URL files
+- Configure the output format with `-f, --format`
+- Configure the output directory with `-o, --output`
+- Validate dependencies (`yt-dlp`/`youtube-dl` and `ffmpeg`)
+- Show a final success/failure summary
+- Support YouTube playlists with explicit `--playlist` opt-in
+- Avoid duplicate downloads with `--archive FILE`
+- Provide an interactive assistant with `-i, --interactive`
+- Keep generated audio out of Git via `.gitignore`
 
-- Conversion d'une ou plusieurs URLs YouTube en audio.
-- Lecture d'un fichier d'URLs.
-- Format de sortie configurable avec `-f/--format`.
-- Dossier de sortie configurable avec `-o/--output`.
-- Vérification des dépendances `yt-dlp`/`youtube-dl` et `ffmpeg`.
-- Résumé des succès/échecs.
-- Exclusion Git des fichiers audio générés via `.gitignore`.
-- Support des playlists YouTube (`--playlist`).
-- Archive anti-doublons (`--archive`).
+### Current limitations
+- No dry-run mode yet
+- No metadata/embed option yet
+- No automated test suite yet
+- No CI workflow yet
+- No optional log file yet
+- No installer script yet
+- No playlist item limit yet
 
-Limitations connues :
+## Repository notes
 
-- Pas de mode interactif.
-- Pas de logs détaillés.
-- Pas d'installation globale du script.
-- Pas de tests automatisés.
+### Main files
+- `youtube_to_mp3.sh` — main script and source of truth for implemented behaviour
+- `README.md` — user documentation
+- `project-state.md` — project tracking and backlog
+- `agents/` — project-specific agent definitions adapted for this repository
 
-## Échelle de complexité
+### Important note
+When documentation and code disagree, `youtube_to_mp3.sh` is the source of truth. For example, the interactive mode is already implemented in the script.
 
-- XS : changement très simple, faible risque.
-- S : petite amélioration localisée.
-- M : fonctionnalité moyenne avec quelques cas à vérifier.
-- L : fonctionnalité importante qui touche plusieurs parties.
-- XL : trop large pour un seul ticket, à découper.
+## Complexity scale
+- **XS** — trivial change, very low risk
+- **S** — small localized improvement
+- **M** — medium feature with a few edge cases
+- **L** — larger feature affecting multiple parts of the workflow
+- **XL** — too large for a single ticket, should be split
 
-## Backlog
+## Completed tickets
 
-### TICKET-001 — ✅ Renommer la documentation principale en README.md
+### TICKET-001 — Rename the main documentation to `README.md`
+**Complexity:** XS  
+**Status:** Done
 
-Complexité : XS | **TERMINÉ (commit 1003a41)**
-
-Renommage effectué : `README_YOUTUBE_MP3.md` → `README.md`.
-
-Complexité : XS
-
-Description :
-Renommer `README_YOUTUBE_MP3.md` en `README.md` afin que GitHub affiche automatiquement la documentation sur la page du dépôt.
-
-Critères d'acceptation :
-
-- Le fichier `README.md` existe à la racine du projet.
-- L'ancien fichier `README_YOUTUBE_MP3.md` n'est plus nécessaire.
-- La page GitHub du dépôt affiche la documentation.
-
----
-
-### TICKET-002 — ✅ Ajouter le support explicite des playlists YouTube
-
-Complexité initiale : L | **TERMINÉ (commit 86fb7cb)**
-
-Support complet implémenté via `--playlist`.
-
-Complexité initiale : L
-
-Description :
-Permettre au script de télécharger l'audio d'une playlist YouTube complète, sans casser le comportement actuel qui limite volontairement les URLs vidéo à une seule vidéo via `--no-playlist`.
-
-Découpage recommandé :
-
-#### TICKET-002A — ✅ Détecter les URLs de playlists
-
-Complexité : S | **TERMINÉ (commit 1003a41)**
-
-Modification de `is_valid_url()` pour accepter les URLs playlist.
-
-Complexité : S
-
-Description :
-Modifier la validation d'URL pour reconnaître les URLs de playlist YouTube et YouTube Music.
-
-Critères d'acceptation :
-
-- `https://www.youtube.com/playlist?list=...` est reconnue comme URL supportée.
-- `https://music.youtube.com/playlist?list=...` est reconnue comme URL supportée.
-- Les URLs non YouTube restent refusées.
-
-#### TICKET-002B — ✅ Ajouter une option `--playlist`
-
-Complexité : M | **TERMINÉ (commit 86fb7cb)**
-
-Option `--playlist` fonctionnelle avec `--yes-playlist`/`--no-playlist`.
-
-Complexité : M
-
-Description :
-Ajouter une option CLI explicite `--playlist` pour autoriser le traitement d'une playlist. Sans cette option, garder le comportement actuel avec `--no-playlist` pour éviter les téléchargements accidentels.
-
-Critères d'acceptation :
-
-- `./youtube_to_mp3.sh --playlist "URL_PLAYLIST"` télécharge la playlist.
-- `./youtube_to_mp3.sh "URL_VIDEO_AVEC_LIST"` ne télécharge qu'une seule vidéo.
-- L'aide `--help` documente l'option.
-
-#### TICKET-002C — ⏸️ Adapter le nommage des fichiers pour les playlists
-
-Complexité : S | **PLANIFIÉ**
-
-À implémenter plus tard pour prefixer les fichiers playlist avec leur index.
-
-Complexité : S
-
-Description :
-Utiliser un template de sortie contenant l'index de playlist lorsque le mode playlist est actif.
-
-Critères d'acceptation :
-
-- Les fichiers d'une playlist sont nommés avec un préfixe d'ordre, par exemple `01 - Titre [id].mp3`.
-- Les vidéos seules conservent le nommage actuel.
+Result:
+- `README.md` exists at the repository root
+- The main documentation is displayed correctly by GitHub
 
 ---
 
-### TICKET-003 — ✅ Ajouter une archive anti-doublons
+### TICKET-002 — Add explicit YouTube playlist support
+**Complexity:** L  
+**Status:** Partially done
 
-Complexité : M | **TERMINÉ (commit 86fb7cb)**
+Completed:
+- **TICKET-002A** — Playlist URLs are recognized
+- **TICKET-002B** — `--playlist` enables full playlist processing
 
-Option `--archive FILE` fonctionnelle avec `--download-archive`.
-
-Complexité : M
-
-Description :
-Ajouter une option permettant d'utiliser `--download-archive` de `yt-dlp`, afin d'éviter de retélécharger les vidéos déjà traitées.
-
-Option proposée :
-
-```bash
-./youtube_to_mp3.sh --archive downloaded.txt urls.txt
-```
-
-Critères d'acceptation :
-
-- L'utilisateur peut fournir un fichier d'archive personnalisé.
-- Si l'option n'est pas fournie, le comportement actuel reste inchangé.
-- Une playlist relancée ne retélécharge pas les vidéos déjà présentes dans l'archive.
+Still open:
+- **TICKET-002C** — Add playlist index prefixes to output filenames
 
 ---
 
-### TICKET-004 — Ajouter une option d'intégration des métadonnées
+### TICKET-003 — Add a duplicate-prevention archive
+**Complexity:** M  
+**Status:** Done
 
-Complexité : M
+Result:
+- `--archive FILE` passes a download archive to `yt-dlp`
+- Re-running the same batch or playlist can skip previously processed items
 
-Description :
-Ajouter une option `--metadata` pour transmettre à `yt-dlp` les options d'intégration des métadonnées et miniatures lorsque c'est possible.
+---
 
-Options `yt-dlp` candidates :
+### TICKET-006 — Add an interactive mode
+**Complexity:** L  
+**Status:** Done
 
+Completed:
+- **TICKET-006A** — `-i, --interactive` starts the assistant
+- **TICKET-006B** — The assistant collects source, format, output directory, and archive settings
+- **TICKET-006C** — A final confirmation step is shown before processing starts
+
+---
+
+### TICKET-008 — Improve the README with complete examples
+**Complexity:** S  
+**Status:** Done
+
+Result:
+- The README includes examples for single URLs, multiple URLs, URL files, playlists, custom output folders, and archives
+- Troubleshooting and prerequisites are documented
+
+---
+
+### TICKET-009 — Add an open-source license
+**Complexity:** XS  
+**Status:** Done
+
+Result:
+- `LICENSE` exists
+- The repository is clearly distributed under the MIT License
+
+## Active backlog
+
+### TICKET-002C — Add playlist index prefixes to filenames
+**Complexity:** S  
+**Status:** Planned
+
+Description:
+When playlist mode is enabled, use an output template that includes the playlist index.
+
+Acceptance criteria:
+- Playlist items are saved with an index prefix such as `01 - Title [id].mp3`
+- Single-video downloads keep the current naming format
+
+---
+
+### TICKET-004 — Add a metadata/embed option
+**Complexity:** M  
+**Status:** Planned
+
+Description:
+Add a `--metadata` option that forwards metadata-related flags to `yt-dlp` when supported.
+
+Candidate flags:
 ```bash
 --embed-metadata
 --embed-thumbnail
 ```
 
-Critères d'acceptation :
-
-- `./youtube_to_mp3.sh --metadata URL` ajoute les métadonnées au fichier généré.
-- Sans `--metadata`, le comportement actuel reste inchangé.
-- La documentation mentionne que l'intégration des miniatures peut dépendre du format de sortie et de `ffmpeg`.
-
----
-
-### TICKET-005 — Ajouter un mode simulation / dry-run
-
-Complexité : M
-
-Description :
-Ajouter une option `--dry-run` pour afficher ce qui serait téléchargé sans lancer la conversion.
-
-Critères d'acceptation :
-
-- `./youtube_to_mp3.sh --dry-run URL` affiche le ou les titres détectés.
-- Aucun fichier audio n'est créé.
-- Fonctionne avec les fichiers d'URLs.
-- Fonctionne avec les playlists si `--playlist` est aussi fourni.
+Acceptance criteria:
+- `./youtube_to_mp3.sh --metadata URL` embeds metadata when possible
+- Without `--metadata`, behaviour stays unchanged
+- The documentation explains format and `ffmpeg` limitations clearly
 
 ---
 
-### TICKET-006 — Ajouter un mode interactif
+### TICKET-005 — Add a dry-run mode
+**Complexity:** M  
+**Status:** Planned
 
-Complexité initiale : L
+Description:
+Add a `--dry-run` option to preview what would be processed without creating audio files.
 
-Description :
-Permettre à un utilisateur non technique de lancer le script sans connaître les options CLI.
-
-Découpage recommandé :
-
-#### TICKET-006A — Ajouter l'option `--interactive`
-
-Complexité : S
-
-Description :
-Ajouter une option qui déclenche un assistant en terminal.
-
-Critères d'acceptation :
-
-- `./youtube_to_mp3.sh --interactive` lance le mode interactif.
-- L'aide documente l'option.
-
-#### TICKET-006B — Demander l'URL, le format et le dossier de sortie
-
-Complexité : M
-
-Description :
-Dans le mode interactif, demander à l'utilisateur l'URL ou le fichier, le format audio et le dossier de sortie.
-
-Critères d'acceptation :
-
-- L'utilisateur peut valider les valeurs par défaut avec Entrée.
-- Les valeurs saisies sont réutilisées par le flux existant.
-
-#### TICKET-006C — Ajouter une confirmation avant téléchargement
-
-Complexité : S
-
-Description :
-Afficher un résumé des paramètres choisis et demander confirmation avant de lancer le téléchargement.
-
-Critères d'acceptation :
-
-- Le script affiche URL/fichier, format et dossier de sortie.
-- Réponse `y` ou `yes` lance le traitement.
-- Toute autre réponse annule proprement.
+Acceptance criteria:
+- `./youtube_to_mp3.sh --dry-run URL` shows the detected title or titles
+- No audio file is created
+- Works with URL files
+- Works with playlists when combined with `--playlist`
 
 ---
 
-### TICKET-007 — Ajouter un script d'installation locale
+### TICKET-007 — Add a local installation script
+**Complexity:** M  
+**Status:** Planned
 
-Complexité : M
+Description:
+Create an `install.sh` script to install the command in a user-executable directory such as `~/.local/bin/youtube-to-mp3`.
 
-Description :
-Créer un script `install.sh` pour installer la commande dans `~/.local/bin/youtube-to-mp3` ou proposer une autre destination.
-
-Critères d'acceptation :
-
-- `./install.sh` copie le script dans un dossier exécutable utilisateur.
-- Le script vérifie que le dossier cible est dans le `PATH` ou affiche une instruction claire.
-- Après installation, l'utilisateur peut lancer :
+Acceptance criteria:
+- `./install.sh` copies the script to a user-facing executable path
+- The installer checks whether the target directory is in `PATH`, or prints clear instructions
+- After installation, the user can run:
 
 ```bash
 youtube-to-mp3 urls.txt
@@ -249,187 +178,99 @@ youtube-to-mp3 urls.txt
 
 ---
 
-### TICKET-008 — Améliorer le README avec des exemples complets
+### TICKET-010 — Add basic automated tests
+**Complexity:** L  
+**Status:** Planned
 
-Complexité : S
+Recommended split:
+- **TICKET-010A** — Create a shell test structure
+- **TICKET-010B** — Test help output and CLI errors
+- **TICKET-010C** — Test URL validation
 
-Description :
-Mettre à jour la documentation avec les cas d'usage principaux et les nouvelles options.
-
-Critères d'acceptation :
-
-- Exemple pour une vidéo seule.
-- Exemple pour plusieurs vidéos.
-- Exemple avec fichier d'URLs.
-- Exemple avec playlist.
-- Exemple avec dossier de sortie personnalisé.
-- Exemple avec archive anti-doublons.
-- Section dépannage enrichie.
+Acceptance criteria:
+- A minimal test command can be run locally
+- The test command is documented
+- Help, missing arguments, unknown options, and URL validation are covered
 
 ---
 
-### TICKET-009 — ✅ Ajouter une licence open source
+### TICKET-011 — Add a GitHub Actions validation workflow
+**Complexity:** M  
+**Status:** Planned
 
-Complexité : XS | **TERMINÉ (commit 1003a41)**
+Description:
+Add a CI workflow to run syntax checks and ShellCheck on pushes and pull requests.
 
-Fichier `LICENSE` (MIT) créé.
-
-Complexité : XS
-
-Description :
-Ajouter un fichier `LICENSE`, probablement en MIT, pour clarifier les droits d'utilisation du projet.
-
-Critères d'acceptation :
-
-- Le fichier `LICENSE` existe.
-- Le README mentionne la licence.
-- GitHub détecte la licence du dépôt.
+Acceptance criteria:
+- `.github/workflows/ci.yml` exists
+- The workflow runs `bash -n youtube_to_mp3.sh`
+- The workflow runs `shellcheck youtube_to_mp3.sh`
+- The CI badge can be added to the README later if desired
 
 ---
 
-### TICKET-010 — Ajouter des tests automatisés simples
+### TICKET-012 — Add an optional log file
+**Complexity:** M  
+**Status:** Planned
 
-Complexité initiale : L
+Description:
+Add a `--log FILE` option to write an execution log.
 
-Description :
-Ajouter des tests pour sécuriser les comportements du script, notamment le parsing des arguments et la validation d'URL.
-
-Découpage recommandé :
-
-#### TICKET-010A — Créer une structure de tests Bash
-
-Complexité : M
-
-Description :
-Ajouter un dossier `tests/` avec un premier script de test ou un framework léger comme `bats-core` si choisi.
-
-Critères d'acceptation :
-
-- Un test minimal peut être lancé localement.
-- La commande de test est documentée.
-
-#### TICKET-010B — Tester l'aide et les erreurs CLI
-
-Complexité : S
-
-Description :
-Tester `--help`, absence d'argument et option inconnue.
-
-Critères d'acceptation :
-
-- `--help` retourne un code succès.
-- Absence d'argument retourne une erreur.
-- Option inconnue retourne une erreur.
-
-#### TICKET-010C — Tester la validation des URLs
-
-Complexité : M
-
-Description :
-Tester les URLs supportées et refusées.
-
-Critères d'acceptation :
-
-- URLs vidéo YouTube acceptées.
-- URLs Shorts acceptées.
-- URLs Live acceptées.
-- URLs playlist acceptées seulement si le ticket playlist est implémenté.
-- URLs non YouTube refusées.
+Acceptance criteria:
+- The log includes date/time, URL, status, and requested format
+- Successes and failures are visible after execution
+- Without `--log`, behaviour stays unchanged
 
 ---
 
-### TICKET-011 — Ajouter une GitHub Action de validation
+### TICKET-013 — Add a playlist item limit
+**Complexity:** S  
+**Status:** Planned
 
-Complexité : M
+Description:
+Add an option that forwards `--playlist-items` to `yt-dlp`.
 
-Description :
-Ajouter un workflow GitHub Actions pour vérifier automatiquement la syntaxe Bash et ShellCheck à chaque push ou pull request.
-
-Critères d'acceptation :
-
-- Un fichier `.github/workflows/ci.yml` existe.
-- Le workflow lance `bash -n youtube_to_mp3.sh`.
-- Le workflow lance `shellcheck youtube_to_mp3.sh`.
-- Le badge CI peut être ajouté au README.
-
----
-
-### TICKET-012 — Ajouter un fichier de logs optionnel
-
-Complexité : M
-
-Description :
-Ajouter une option `--log FILE` pour écrire un journal des traitements.
-
-Critères d'acceptation :
-
-- Le log contient la date, l'URL, le statut et le format demandé.
-- Les succès et échecs sont visibles après exécution.
-- Sans option `--log`, le comportement actuel reste inchangé.
-
----
-
-### TICKET-013 — Ajouter une limite de téléchargement pour playlists
-
-Complexité : S
-
-Description :
-Ajouter une option permettant de limiter les éléments traités dans une playlist via `--playlist-items` de `yt-dlp`.
-
-Exemple :
-
+Example:
 ```bash
 ./youtube_to_mp3.sh --playlist --playlist-items 1-10 "URL_PLAYLIST"
 ```
 
-Critères d'acceptation :
-
-- L'option est disponible uniquement ou principalement pour le mode playlist.
-- La valeur est transmise à `yt-dlp`.
-- L'aide documente l'option.
-
----
-
-### TICKET-014 — Ajouter une option de mise à jour de yt-dlp
-
-Complexité : S
-
-Description :
-Ajouter une option `--update-ytdlp` ou documenter une commande de mise à jour, car YouTube change souvent et `yt-dlp` doit rester récent.
-
-Critères d'acceptation :
-
-- L'utilisateur dispose d'une méthode claire pour mettre à jour `yt-dlp`.
-- Le script ne casse pas si `yt-dlp` a été installé via Homebrew plutôt que pip.
-- La documentation explique les méthodes macOS/Linux.
+Acceptance criteria:
+- The option is available mainly for playlist mode
+- The value is forwarded correctly to `yt-dlp`
+- The help text documents the option
 
 ---
 
-## Ordre de réalisation recommandé
+### TICKET-014 — Add a clearer `yt-dlp` update path
+**Complexity:** S  
+**Status:** Planned
 
-1. TICKET-001 — Renommer le README.
-2. TICKET-009 — Ajouter une licence.
-3. TICKET-002A/B/C — Support playlists.
-4. TICKET-003 — Archive anti-doublons.
-5. TICKET-008 — Documentation complète.
-6. TICKET-011 — CI ShellCheck.
-7. TICKET-005 — Dry-run.
-8. TICKET-004 — Métadonnées.
-9. TICKET-007 — Installation locale.
-10. TICKET-006A/B/C — Mode interactif.
-11. TICKET-010A/B/C — Tests automatisés.
-12. TICKET-012 — Logs.
-13. TICKET-013 — Limite playlists.
-14. TICKET-014 — Mise à jour yt-dlp.
+Description:
+Add a `--update-ytdlp` option or document the recommended update path more clearly, since YouTube changes often and `yt-dlp` must stay current.
 
-## Notes de priorité
+Acceptance criteria:
+- Users have a clear way to update `yt-dlp`
+- The script does not assume `yt-dlp` was installed via `pip`
+- The documentation explains both macOS and Linux update paths
 
-La prochaine version utile du projet devrait viser une version `v1.1` avec :
+## Recommended implementation order
+1. TICKET-010 — Automated tests
+2. TICKET-011 — CI validation
+3. TICKET-005 — Dry-run mode
+4. TICKET-004 — Metadata embedding
+5. TICKET-007 — Local installer
+6. TICKET-012 — Optional log file
+7. TICKET-013 — Playlist item limit
+8. TICKET-002C — Playlist filename indexing
+9. TICKET-014 — Clear `yt-dlp` update workflow
 
-- `README.md`
-- `LICENSE`
-- support playlist explicite
-- archive anti-doublons
-- documentation mise à jour
+## Release direction
+The next useful project milestone should focus on reliability and maintainability rather than feature breadth:
+- automated tests
+- CI validation
+- dry-run support
+- optional logging
+- installation ergonomics
 
-Ces changements améliorent fortement l'utilisation sans rendre le script trop complexe.
+That path improves confidence in the script without making the core workflow unnecessarily complex.
