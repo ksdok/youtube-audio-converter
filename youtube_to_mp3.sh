@@ -39,7 +39,7 @@ main() {
 
     # Show banner only when we're about to do real work
     log_header "========================================"
-    log_header "  YouTube Audio Converter"
+    log_header "        YouTube Audio Converter"
     log_header "========================================"
     echo ""
 

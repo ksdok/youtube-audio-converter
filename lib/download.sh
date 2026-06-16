@@ -35,11 +35,12 @@ _build_ydl_args() {
 
 # ── Dry-run preview ────────────────────────────────────────────────────
 # Shows what would be downloaded without actually downloading.
-# Args: $1=URL, $2=index (1-based)
+# Args: $1=URL, $2=index (1-based), $3=total (optional, for progress display)
 
 _dry_run_url() {
     local url="$1"
     local index="$2"
+    local total="${3:-}"
 
     if ! is_valid_url "$url"; then
         log_error "Invalid URL: $url"
@@ -53,22 +54,33 @@ _dry_run_url() {
         title="(title unavailable)"
     fi
 
-    printf '  [%d] %s\n    URL: %s\n    Format: %s → %s\n' \
-        "$index" "$title" "$url" "$CONFIG_FORMAT" "$CONFIG_OUTPUT_DIR"
+    if [ -n "$total" ]; then
+        printf '  [%d/%d] %s\n    URL: %s\n    Format: %s → %s\n' \
+            "$index" "$total" "$title" "$url" "$CONFIG_FORMAT" "$CONFIG_OUTPUT_DIR"
+    else
+        printf '  [%d] %s\n    URL: %s\n    Format: %s → %s\n' \
+            "$index" "$title" "$url" "$CONFIG_FORMAT" "$CONFIG_OUTPUT_DIR"
+    fi
 
     return 0
 }
 
 # ── Process single URL ─────────────────────────────────────────────────
 # Download and convert one URL.
-# Args: $1=URL, $2=index (1-based)
+# Args: $1=URL, $2=index (1-based), $3=total (optional, for progress display)
 # Returns: 0 on success, 1 on failure.
 
 process_url() {
     local url="$1"
     local index="$2"
+    local total="${3:-}"
 
-    log_step "Processing video ${index}: ${url}"
+    # --- Progress indicator ---
+    if [ -n "$total" ]; then
+        log_step "[${index}/${total}] Processing..."
+    else
+        log_step "[${index}] Processing..."
+    fi
 
     if ! is_valid_url "$url"; then
         log_error "Invalid or unsupported YouTube URL: $url"
@@ -90,7 +102,8 @@ process_url() {
         title="video_${index}"
     fi
 
-    log_info "Title: ${title}"
+    log_info "  Title: ${title}"
+    log_info "  URL: ${url}"
 
     # --- Build args and run ---
     _build_ydl_args "$url"
@@ -155,7 +168,7 @@ process_urls() {
         [ "$CONFIG_PLAYLIST_MODE" = true ] && playlist_status="enabled"
 
         for i in "${!urls[@]}"; do
-            _dry_run_url "${urls[$i]}" "$((i + 1))"
+            _dry_run_url "${urls[$i]}" "$((i + 1))" "$total"
         done
         echo ""
         log_info "Format: ${CONFIG_FORMAT} | Output: ${CONFIG_OUTPUT_DIR} | Playlist: ${playlist_status}"
@@ -174,7 +187,7 @@ process_urls() {
         local url="${urls[$i]}"
         local index=$((i + 1))
 
-        if process_url "$url" "$index"; then
+        if process_url "$url" "$index" "$total"; then
             ((success_count++)) || true
         else
             ((fail_count++)) || true
