@@ -44,6 +44,13 @@ pip install yt-dlp
 
 > **Note**: `ffmpeg` must be installed as a system binary. The Python package `ffmpeg-python` is not sufficient.
 
+### Getting the Project
+
+```bash
+git clone https://github.com/kim/youtube-audio-converter.git
+cd youtube-audio-converter
+```
+
 ### Installing the Command
 
 Run the installer from the project root:
