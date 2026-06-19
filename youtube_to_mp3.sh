@@ -27,6 +27,9 @@ source "${LIB_DIR}/interactive.sh"
 # ── Main ───────────────────────────────────────────────────────────────
 
 main() {
+    # Trap Ctrl+C to exit cleanly with the interrupted code
+    trap 'log_warn "Operation interrupted by user."; exit "$EXIT_INTERRUPTED"' SIGINT
+
     # Parse CLI arguments → sets CONFIG_* variables
     parse_args "$@"
 

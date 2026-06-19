@@ -1,4 +1,4 @@
-# Fichiers audio générés
+# Generated audio files
 mp3/
 *.mp3
 *.m4a
@@ -7,10 +7,10 @@ mp3/
 *.opus
 *.aac
 
-# Fichiers temporaires d'éditeurs
+# Editor temporary files
 .*.swp
 *.swp
 *~
 
-# Fichiers système macOS
+# macOS system files
 .DS_Store

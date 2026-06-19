@@ -115,3 +115,18 @@ ensure_output_dir() {
         mkdir -p -- "$dir"
     fi
 }
+
+# ── Audio format validation ────────────────────────────────────────────
+
+# Check that a format is in the supported list.
+# Returns 0 if supported, 1 otherwise.
+is_supported_format() {
+    local format="$1"
+    local supported
+    for supported in "${SUPPORTED_AUDIO_FORMATS[@]}"; do
+        if [ "$format" = "$supported" ]; then
+            return 0
+        fi
+    done
+    return 1
+}

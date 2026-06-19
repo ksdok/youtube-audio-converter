@@ -84,6 +84,11 @@ parse_args() {
             -f|--format)
                 require_option_argument "$1" "$#" "a format"
                 reject_url_option_argument "$1" "$2"
+                if ! is_supported_format "$2"; then
+                    log_error "Unsupported audio format: $2"
+                    log_error "Supported formats: ${SUPPORTED_AUDIO_FORMATS[*]}"
+                    exit "$EXIT_INVALID_ARG"
+                fi
                 CONFIG_FORMAT="$2"
                 shift 2
                 ;;

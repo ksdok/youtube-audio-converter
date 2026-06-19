@@ -8,6 +8,12 @@ readonly DEFAULT_OUTPUT_DIR="./mp3"
 readonly DEFAULT_AUDIO_FORMAT="mp3"
 readonly DEFAULT_AUDIO_QUALITY="0"  # best quality for yt-dlp
 
+# ── Supported audio formats ────────────────────────────────────────────
+# Formats that yt-dlp + ffmpeg can produce via --audio-format.
+readonly SUPPORTED_AUDIO_FORMATS=(
+    "mp3" "m4a" "wav" "flac" "opus" "aac" "vorbis" "alac"
+)
+
 # ── Terminal colors ────────────────────────────────────────────────────
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'

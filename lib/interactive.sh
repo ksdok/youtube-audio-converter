@@ -6,8 +6,6 @@
 # ── Main interactive flow ───────────────────────────────────────────────
 
 run_interactive_mode() {
-    trap 'log_warn "Operation interrupted by user."; exit "$EXIT_INTERRUPTED"' SIGINT
-
     log_header "Starting interactive assistant..."
 
     # --- Step 1: Source ---
@@ -136,14 +134,21 @@ _interactive_check_playlists() {
     local has_playlist=false
 
     if [ -n "${INTERACTIVE_SOURCE_FILE:-}" ]; then
-        # Check file for playlist URLs (ignoring comments)
-        if grep -v '^[[:space:]]*#' "$INTERACTIVE_SOURCE_FILE" 2>/dev/null | grep -q "playlist"; then
-            has_playlist=true
-        fi
+        # Check file for playlist URLs using the proper validator
+        local line
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Skip empty lines and comments
+            [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if is_playlist_url "$line"; then
+                has_playlist=true
+                break
+            fi
+        done < "$INTERACTIVE_SOURCE_FILE"
     else
         local url
         for url in "${INTERACTIVE_SOURCES[@]}"; do
-            if [[ "$url" == *playlist* ]]; then
+            if is_playlist_url "$url"; then
                 has_playlist=true
                 break
             fi
@@ -165,7 +170,14 @@ _interactive_check_playlists() {
 _interactive_collect_config() {
     log_step "Configuration"
 
-    CONFIG_FORMAT=$(prompt_user "Output audio format" "$CONFIG_FORMAT")
+    while true; do
+        CONFIG_FORMAT=$(prompt_user "Output audio format" "$CONFIG_FORMAT")
+        if is_supported_format "$CONFIG_FORMAT"; then
+            break
+        fi
+        log_error "Unsupported format. Supported: ${SUPPORTED_AUDIO_FORMATS[*]}"
+    done
+
     CONFIG_OUTPUT_DIR=$(prompt_user "Output directory" "$CONFIG_OUTPUT_DIR")
 
     local archive_default=""

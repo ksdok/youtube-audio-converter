@@ -331,6 +331,55 @@ Acceptance criteria:
 
 ---
 
+### TICKET-015 — Audit fixes (logic, safety, consistency)
+**Complexity:** M  
+**Status:** Done
+
+Fixes identified during the 2026-06-19 maturity audit.
+
+#### BUG 1 — Playlist detection uses substring heuristic (interactive.sh)
+**Complexity:** S  
+**Status:** Done
+
+`_interactive_check_playlists` matches the literal substring "playlist" instead of using the existing `is_playlist_url()` validator. A video URL containing "playlist" in its ID triggers a false "Playlist detected!" warning.
+
+Acceptance criteria:
+- `is_playlist_url()` is used for both single URLs and file contents
+- A video URL that happens to contain "playlist" no longer triggers a false alert
+
+---
+
+#### BUG 4 — No audio format validation (cli.sh, interactive.sh)
+**Complexity:** S  
+**Status:** Done
+
+The `-f / --format` value is forwarded to `yt-dlp` without validation. An invalid format fails late and unclearly.
+
+Acceptance criteria:
+- A supported-formats list is defined in `constants.sh`
+- Invalid formats are rejected with a clear error before any download starts
+- Interactive mode validates the entered format
+
+---
+
+#### BUG 5 — SIGINT not trapped in batch mode (youtube_to_mp3.sh)
+**Complexity:** S  
+**Status:** Done
+
+A Ctrl+C during a batch download can leave `.part` / `.webm` temp files in the output directory because only interactive mode has a SIGINT trap.
+
+Acceptance criteria:
+- A global SIGINT trap is installed in `main()`
+- The trap exits cleanly with `EXIT_INTERRUPTED`
+
+---
+
+#### BUG 2 & 3 — Redundant network calls for title extraction (download.sh)
+**Complexity:** M  
+**Status:** Documented
+
+`process_url` and `_dry_run_url` each call `yt-dlp --get-title` separately from the download call. For large batches this doubles the network cost. Refactoring the download flow to use `--print` or batch metadata extraction is a larger change that touches core logic and is deferred to a dedicated ticket.
+
 ### TICKET-014 — Add a clearer `yt-dlp` update path
 **Complexity:** S  
 **Status:** Planned
