@@ -140,6 +140,9 @@ _interactive_check_playlists() {
             # Skip empty lines and comments
             [[ "$line" =~ ^[[:space:]]*$ ]] && continue
             [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            # Trim leading/trailing whitespace before validation
+            line="${line#"${line%%[![:space:]]*}"}"
+            line="${line%"${line##*[![:space:]]}"}"
             if is_playlist_url "$line"; then
                 has_playlist=true
                 break
@@ -173,6 +176,7 @@ _interactive_collect_config() {
     while true; do
         CONFIG_FORMAT=$(prompt_user "Output audio format" "$CONFIG_FORMAT")
         if is_supported_format "$CONFIG_FORMAT"; then
+            CONFIG_FORMAT=$(printf '%s' "$CONFIG_FORMAT" | tr '[:upper:]' '[:lower:]')
             break
         fi
         log_error "Unsupported format. Supported: ${SUPPORTED_AUDIO_FORMATS[*]}"

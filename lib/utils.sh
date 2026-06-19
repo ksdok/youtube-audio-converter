@@ -121,7 +121,8 @@ ensure_output_dir() {
 # Check that a format is in the supported list.
 # Returns 0 if supported, 1 otherwise.
 is_supported_format() {
-    local format="$1"
+    local format
+    format=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
     local supported
     for supported in "${SUPPORTED_AUDIO_FORMATS[@]}"; do
         if [ "$format" = "$supported" ]; then

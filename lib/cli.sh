@@ -89,7 +89,7 @@ parse_args() {
                     log_error "Supported formats: ${SUPPORTED_AUDIO_FORMATS[*]}"
                     exit "$EXIT_INVALID_ARG"
                 fi
-                CONFIG_FORMAT="$2"
+                CONFIG_FORMAT=$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]')
                 shift 2
                 ;;
             --playlist)
