@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# install.sh — Install youtube-to-mp3 as a user command
+# install.sh — Install or uninstall youtube-to-mp3 as a user command
 # Copies the script and lib/ to ~/.local/share/youtube-audio-converter/
 # and creates a wrapper in ~/.local/bin/youtube-to-mp3.
+#
+# Usage:
+#   ./install.sh             Install (or reinstall)
+#   ./install.sh --uninstall Remove the installed files
 
 set -euo pipefail
 
@@ -24,6 +28,56 @@ log_info()    { printf '%b%b%b\n' "$BLUE" "$*" "$NC"; }
 log_success() { printf '%b✓ %b%b\n' "$GREEN" "$*" "$NC"; }
 log_error()   { printf '%b✗ %b%b\n' "$RED" "$*" "$NC" >&2; }
 log_warn()    { printf '%b⚠ %b%b\n' "$YELLOW" "$*" "$NC" >&2; }
+
+# ── Uninstall ──────────────────────────────────────────────────────────
+
+do_uninstall() {
+    local removed=false
+
+    if [ -f "${BIN_DIR}/${COMMAND_NAME}" ]; then
+        rm -f -- "${BIN_DIR:?}/${COMMAND_NAME}"
+        log_success "Removed: ${BIN_DIR}/${COMMAND_NAME}"
+        removed=true
+    fi
+
+    if [ -d "${INSTALL_DIR}" ]; then
+        rm -rf -- "${INSTALL_DIR:?}"
+        log_success "Removed: ${INSTALL_DIR}"
+        removed=true
+    fi
+
+    if [ "$removed" = false ]; then
+        log_warn "Nothing to uninstall — no installed files found."
+        exit 0
+    fi
+
+    log_info "youtube-to-mp3 has been uninstalled."
+    exit 0
+}
+
+# ── Parse arguments ────────────────────────────────────────────────────
+
+case "${1:-}" in
+    --uninstall)
+        do_uninstall
+        ;;
+    -h|--help)
+        echo "Usage: $(basename "$0") [--uninstall] [--help]"
+        echo ""
+        echo "  (no args)     Install youtube-to-mp3"
+        echo "  --uninstall   Remove the installed files"
+        echo "  --help        Show this help"
+        exit 0
+        ;;
+    "")
+        : # proceed to install
+        ;;
+    *)
+        log_error "Unknown argument: $1"
+        echo "Usage: $(basename "$0") [--uninstall] [--help]" >&2
+        exit 1
+        ;;
+esac
 
 # ── Pre-flight checks ──────────────────────────────────────────────────
 

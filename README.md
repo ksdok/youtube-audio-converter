@@ -70,6 +70,14 @@ youtube-to-mp3 urls.txt
 
 If `~/.local/bin` is not in your `PATH`, the installer prints the exact line to add to your shell configuration.
 
+### Uninstalling
+
+```bash
+./install.sh --uninstall
+```
+
+This removes the wrapper and the installed files.
+
 ## Usage
 
 ### 1. Simple Download (single videos)
