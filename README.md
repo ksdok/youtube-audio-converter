@@ -20,7 +20,7 @@ The script requires the following tools:
 1. **yt-dlp** (strongly recommended) or **youtube-dl**.
 2. **ffmpeg** (essential for audio conversion).
 
-### Quick Installation
+### Quick Installation of Dependencies
 
 #### macOS (via Homebrew)
 ```bash
@@ -43,6 +43,25 @@ pip install yt-dlp
 ```
 
 > **Note**: `ffmpeg` must be installed as a system binary. The Python package `ffmpeg-python` is not sufficient.
+
+### Installing the Command
+
+Run the installer from the project root:
+
+```bash
+./install.sh
+```
+
+This copies the script and its `lib/` modules to `~/.local/share/youtube-audio-converter/` and creates a `youtube-to-mp3` wrapper in `~/.local/bin/`.
+
+After installation, the command is available from anywhere:
+
+```bash
+youtube-to-mp3 --help
+youtube-to-mp3 urls.txt
+```
+
+If `~/.local/bin` is not in your `PATH`, the installer prints the exact line to add to your shell configuration.
 
 ## Usage
 

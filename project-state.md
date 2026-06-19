@@ -229,7 +229,7 @@ Acceptance criteria:
 
 ### TICKET-007 — Add a local installation script
 **Complexity:** M  
-**Status:** Planned
+**Status:** Done
 
 Description:
 Create an `install.sh` script to install the command in a user-executable directory such as `~/.local/bin/youtube-to-mp3`.
