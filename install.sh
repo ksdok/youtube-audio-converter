@@ -40,10 +40,17 @@ do_uninstall() {
         removed=true
     fi
 
+    # Remove only the files we own, then tidy up the directory if empty
     if [ -d "${INSTALL_DIR}" ]; then
-        rm -rf -- "${INSTALL_DIR:?}"
-        log_success "Removed: ${INSTALL_DIR}"
+        rm -f -- "${INSTALL_DIR:?}/youtube_to_mp3.sh"
+        rm -rf -- "${INSTALL_DIR:?}/lib"
         removed=true
+        if rmdir "${INSTALL_DIR}" 2>/dev/null; then
+            log_success "Removed: ${INSTALL_DIR}"
+        else
+            log_success "Removed installed files from: ${INSTALL_DIR}"
+            log_warn "Directory kept (not empty): ${INSTALL_DIR}"
+        fi
     fi
 
     if [ "$removed" = false ]; then
