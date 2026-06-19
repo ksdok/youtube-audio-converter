@@ -376,9 +376,13 @@ Acceptance criteria:
 
 #### BUG 2 & 3 — Redundant network calls for title extraction (download.sh)
 **Complexity:** M  
-**Status:** Documented
+**Status:** Done
 
-`process_url` and `_dry_run_url` each call `yt-dlp --get-title` separately from the download call. For large batches this doubles the network cost. Refactoring the download flow to use `--print` or batch metadata extraction is a larger change that touches core logic and is deferred to a dedicated ticket.
+`process_url` and `_dry_run_url` each call `yt-dlp --get-title` separately from the download call. For large batches this doubles the network cost.
+
+Fixes applied:
+- `process_url`: removed the separate `--get-title` call; yt-dlp shows the title in its own progress output during download
+- `_dry_run_url`: replaced deprecated `--get-title` with `--print "%(title)s"` (modern yt-dlp API, no `head -n 1` needed)
 
 ### TICKET-014 — Add a clearer `yt-dlp` update path
 **Complexity:** S  

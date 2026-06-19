@@ -48,7 +48,7 @@ _dry_run_url() {
     fi
 
     local title
-    title=$($YOUTUBE_DL --no-playlist --get-title -- "$url" 2>/dev/null | head -n 1) || title=""
+    title=$($YOUTUBE_DL --no-playlist --print "%(title)s" -- "$url" 2>/dev/null) || title=""
 
     if [ -z "$title" ]; then
         title="(title unavailable)"
@@ -94,15 +94,6 @@ process_url() {
         return 0
     fi
 
-    # --- Extract title for progress display ---
-    local title
-    title=$($YOUTUBE_DL --no-playlist --get-title -- "$url" 2>/dev/null | head -n 1) || title=""
-
-    if [ -z "$title" ]; then
-        title="video_${index}"
-    fi
-
-    log_info "  Title: ${title}"
     log_info "  URL: ${url}"
 
     # --- Build args and run ---
